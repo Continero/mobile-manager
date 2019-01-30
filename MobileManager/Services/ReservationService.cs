@@ -25,7 +25,9 @@ namespace MobileManager.Services
     public class ReservationService : IReservationService, IHostedService, IDisposable
     {
         private readonly IManagerLogger _logger;
+
         private RestClient RestClient { get; }
+
         private readonly AppiumService _appiumService;
         private Task _reservationService;
         private readonly DeviceUtils _deviceUtils;
@@ -34,7 +36,8 @@ namespace MobileManager.Services
         /// <summary>
         /// Initializes a new instance of the <see cref="T:MobileManager.Services.ReservationService"/> class.
         /// </summary>
-        public ReservationService(IManagerConfiguration configuration, IManagerLogger logger, IExternalProcesses externalProcesses)
+        public ReservationService(IManagerConfiguration configuration, IManagerLogger logger,
+            IExternalProcesses externalProcesses)
         {
             _logger = logger;
             var externalProcesses1 = externalProcesses;
@@ -117,6 +120,7 @@ namespace MobileManager.Services
         /// Applies the available reservations.
         /// </summary>
         /// <returns>The available reservations.</returns>
+
         //todo refactor - split into multiple methods
         public async Task<bool> ApplyAvailableReservations()
         {

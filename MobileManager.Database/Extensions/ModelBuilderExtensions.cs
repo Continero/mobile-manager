@@ -47,6 +47,7 @@ namespace MobileManager.Database.Extensions
         private class PropertyDbMapping
         {
             public string PropertyName { get; set; }
+
             public Dictionary<DbProviders, string> Mappings { get; set; }
         }
 
@@ -56,6 +57,7 @@ namespace MobileManager.Database.Extensions
         private class ClassDbMapping
         {
             public Dictionary<DbProviders, string> TableNames { get; set; }
+
             public List<PropertyDbMapping> PropertyMappings { get; set; }
         }
     }

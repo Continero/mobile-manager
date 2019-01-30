@@ -29,7 +29,8 @@ namespace MobileManager.Controllers
         /// <param name="restClient">Rest client.</param>
         /// <param name="logger">Logger</param>
         /// <param name="externalProcesses"></param>
-        public AdbController(IRestClient restClient, IManagerLogger logger, IExternalProcesses externalProcesses) : base(logger)
+        public AdbController(IRestClient restClient, IManagerLogger logger, IExternalProcesses externalProcesses) :
+            base(logger)
         {
             _restClient = restClient;
             _logger = logger;

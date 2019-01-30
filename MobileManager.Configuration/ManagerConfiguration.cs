@@ -83,6 +83,7 @@ namespace MobileManager.Configuration
                     .GetCustomAttributes(typeof(AssemblyInformationalVersionAttribute)).FirstOrDefault();
 
                 return version?.InformationalVersion;
+
                 //get => Application.ProductVersion.ToString();
             }
         }

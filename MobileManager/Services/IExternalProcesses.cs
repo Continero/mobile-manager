@@ -23,7 +23,8 @@
         /// <param name="workingDirectory">Working directory</param>
         /// <param name="pipe">Pipe output to another binary.</param>
         /// <param name="timeout">Timeout.</param>
-        string RunProcessWithBashAndReadOutput(string processName, string processArgs, string workingDirectory = "", string pipe = "",
+        string RunProcessWithBashAndReadOutput(string processName, string processArgs, string workingDirectory = "",
+            string pipe = "",
             int timeout = 5000);
 
         /// <summary>

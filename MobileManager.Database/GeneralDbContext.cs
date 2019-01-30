@@ -101,7 +101,7 @@ namespace MobileManager.Database
         /// Gets or sets the Xcuitests.
         /// </summary>
         public DbSet<Xcuitest> Xcuitests { get; set; }
-        
+
         /// <summary>
         /// GitRepositories DbSet.
         /// </summary>

@@ -66,7 +66,6 @@ namespace MobileManager
         /// Configures the services.
         /// </summary>
         /// <param name="services">Services.</param>
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             using (var deviceDbContext = new GeneralDbContext())
@@ -133,7 +132,7 @@ namespace MobileManager
                 .AddSingleton<IDeviceUtils, DeviceUtils>()
                 .AddSingleton<IScreenshotService, ScreenshotService>()
                 .AddSingleton<IExternalProcesses, ExternalProcesses>();
-                
+
 
             services.AddMvcCore().AddApiExplorer();
 

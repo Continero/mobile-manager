@@ -16,7 +16,7 @@ namespace MobileManager.Controllers.Interfaces
 
         [HttpGet]
         IEnumerable<IGitRepository> GetAvailableRepositories();
-        
+
         [HttpPost]
         IActionResult CloneTestRepository([FromBody] GitRepository gitRepository);
 
@@ -25,6 +25,5 @@ namespace MobileManager.Controllers.Interfaces
 
         [HttpGet]
         IActionResult GetXcuitestResultArtifact(string id);
-
     }
 }

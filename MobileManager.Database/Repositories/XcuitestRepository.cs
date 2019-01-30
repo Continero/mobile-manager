@@ -49,6 +49,7 @@ namespace MobileManager.Database.Repositories
         public void Update(Xcuitest entity)
         {
             _context.Xcuitests.Update(entity);
-            _context.SaveChanges();        }
+            _context.SaveChanges();
+        }
     }
 }

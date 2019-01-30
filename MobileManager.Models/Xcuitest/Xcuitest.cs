@@ -38,7 +38,7 @@ namespace MobileManager.Models.Xcuitest
 
         /// <inheritdoc />
         public string Results { get; set; }
-        
+
         public XcuitestOutputFormat OutputFormat { get; set; }
     }
 }

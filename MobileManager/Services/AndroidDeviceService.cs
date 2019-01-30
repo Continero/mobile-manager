@@ -34,7 +34,8 @@ namespace MobileManager.Services
         /// <summary>
         /// Initializes a new instance of the <see cref="T:MobileManager.Services.AndroidDeviceService"/> class.
         /// </summary>
-        public AndroidDeviceService(IManagerConfiguration configuration, IManagerLogger logger, IExternalProcesses externalProcesses)
+        public AndroidDeviceService(IManagerConfiguration configuration, IManagerLogger logger,
+            IExternalProcesses externalProcesses)
         {
             _logger = logger;
             _externalProcesses = externalProcesses;

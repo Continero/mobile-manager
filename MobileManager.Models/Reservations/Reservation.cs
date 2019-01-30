@@ -39,6 +39,7 @@ namespace MobileManager.Models.Reservations
         /// Gets or sets the requested devices.
         /// </summary>
         /// <value>The requested devices.</value>
+
         //[ForeignKey("ReservationRefId")]
         public List<RequestedDevices> RequestedDevices { get; set; }
 

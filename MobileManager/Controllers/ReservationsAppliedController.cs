@@ -42,7 +42,8 @@ namespace MobileManager.Controllers
         /// <param name="logger">Logger.</param>
         /// <param name="externalProcesses"></param>
         public ReservationsAppliedController(IRepository<ReservationApplied> reservationsAppliedRepository,
-            IRestClient restClient, IAppiumService appiumService, IManagerLogger logger, IExternalProcesses externalProcesses) : base(logger)
+            IRestClient restClient, IAppiumService appiumService, IManagerLogger logger,
+            IExternalProcesses externalProcesses) : base(logger)
         {
             _reservationsAppliedRepository = reservationsAppliedRepository;
             _restClient = restClient;

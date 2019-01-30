@@ -70,6 +70,7 @@ namespace MobileManagerTests.Controllers
         public void GetAllAppliedReservations()
         {
             var appliedReservations = new List<ReservationApplied> {_reservationApplied1, _reservationApplied2};
+
             // Arrange
             var mockRepository = new Mock<IRepository<ReservationApplied>>();
             mockRepository.Setup(mpr => mpr.GetAll()).Returns(appliedReservations);

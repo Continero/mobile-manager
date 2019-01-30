@@ -33,7 +33,8 @@ namespace MobileManager.Services
         /// <summary>
         /// Initializes a new instance of the <see cref="T:MobileManager.Services.AppiumService"/> class.
         /// </summary>
-        public AppiumService(IManagerConfiguration configuration, IManagerLogger logger, IExternalProcesses externalProcesses)
+        public AppiumService(IManagerConfiguration configuration, IManagerLogger logger,
+            IExternalProcesses externalProcesses)
         {
             _logger = logger;
             _externalProcesses = externalProcesses;

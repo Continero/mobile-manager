@@ -77,10 +77,12 @@ namespace MobileManager.Services
 
 
         /// <inheritdoc />
-        public string RunProcessWithBashAndReadOutput(string processName, string processArgs, string workingDirectory = "", string pipe = "",
+        public string RunProcessWithBashAndReadOutput(string processName, string processArgs,
+            string workingDirectory = "", string pipe = "",
             int timeout = 5000)
         {
-            _logger.Debug($"{nameof(RunProcessWithBashAndReadOutput)} processName: [{processName}], args: [{processArgs}], workingDir [{workingDirectory}], pipe [{pipe}]");
+            _logger.Debug(
+                $"{nameof(RunProcessWithBashAndReadOutput)} processName: [{processName}], args: [{processArgs}], workingDir [{workingDirectory}], pipe [{pipe}]");
 
             var psi = new ProcessStartInfo()
             {

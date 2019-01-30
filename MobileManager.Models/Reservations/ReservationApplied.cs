@@ -50,6 +50,7 @@ namespace MobileManager.Models.Reservations
         /// Gets or sets the reserved devices.
         /// </summary>
         /// <value>The reserved devices.</value>
+
         //[Required]  //<======= Forces Cascade delete
         //[ForeignKey("ReservationAppliedRefId")]
         public List<ReservedDevice> ReservedDevices { get; set; }
