@@ -24,8 +24,10 @@ using MobileManager.Http.Clients;
 using MobileManager.Http.Clients.Interfaces;
 using MobileManager.Logging.Logger;
 using MobileManager.Models.Devices;
+using MobileManager.Models.Git;
 using MobileManager.Models.Logger;
 using MobileManager.Models.Reservations;
+using MobileManager.Models.Xcuitest;
 using MobileManager.Services;
 using MobileManager.Services.Interfaces;
 using MobileManager.Utils;
@@ -117,7 +119,9 @@ namespace MobileManager
                 .AddTransient<IRepository<Reservation>, ReservationQueueRepository>()
                 .AddTransient<IRepository<ReservationApplied>, ReservationAppliedRepository>()
                 .AddTransient<IRepository<AppiumProcess>, AppiumRepository>()
-                .AddTransient<IRepository<LogMessage>, LoggerRepository>();
+                .AddTransient<IRepository<LogMessage>, LoggerRepository>()
+                .AddTransient<IRepository<Xcuitest>, XcuitestRepository>()
+                .AddTransient<IRepository<GitRepository>, GitRepositoryRepository>();
 
             //services.AddSingleton<IManagerConfiguration, ManagerConfiguration>();
             services.AddSingleton<IRestClient, RestClient>()

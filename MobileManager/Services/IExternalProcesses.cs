@@ -15,6 +15,18 @@
         string RunProcessAndReadOutput(string processName, string processArgs, int timeout = 5000);
 
         /// <summary>
+        /// Runs the process and read output.
+        /// </summary>
+        /// <returns>The process and read output.</returns>
+        /// <param name="processName">Process name.</param>
+        /// <param name="processArgs">Process arguments.</param>
+        /// <param name="workingDirectory">Working directory</param>
+        /// <param name="pipe">Pipe output to another binary.</param>
+        /// <param name="timeout">Timeout.</param>
+        string RunProcessWithBashAndReadOutput(string processName, string processArgs, string workingDirectory = "", string pipe = "",
+            int timeout = 5000);
+
+        /// <summary>
         /// Runs the shell process.
         /// </summary>
         /// <returns>The shell process.</returns>

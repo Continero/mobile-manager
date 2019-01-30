@@ -21,7 +21,7 @@ namespace MobileManager.Controllers.Interfaces
         IActionResult CloneTestRepository([FromBody] GitRepository gitRepository);
 
         [HttpPost]
-        HttpResponseMessage RunXcuitest([FromBody] Xcuitest xcuitest);
+        IActionResult RunXcuitest([FromBody] Xcuitest xcuitest);
 
         [HttpGet]
         IActionResult GetXcuitestResultArtifact(string id);

@@ -1,0 +1,41 @@
+﻿{
+    "TableNames": {
+        "MsSql": "GitRepository",
+        "Sqlite": "GitRepository",
+        "PostgreSql": "git_repository"
+    },
+    "PropertyMappings": [
+        {
+            "PropertyName": "Id",
+            "Mappings": {
+                "MsSql": "Id",
+                "Sqlite": "Id",
+                "PostgreSql": "id"
+            }
+        },
+        {
+            "PropertyName": "Name",
+            "Mappings": {
+                "MsSql": "Name",
+                "Sqlite": "Name",
+                "PostgreSql": "name"
+            }
+        },
+        {
+            "PropertyName": "Remote",
+            "Mappings": {
+                "MsSql": "Remote",
+                "Sqlite": "Remote",
+                "PostgreSql": "remote"
+            }
+        },
+        {
+            "PropertyName": "DirectoryPath",
+            "Mappings": {
+                "MsSql": "DirectoryPath",
+                "Sqlite": "DirectoryPath",
+                "PostgreSql": "directory_path"
+            }
+        }
+    ]
+}

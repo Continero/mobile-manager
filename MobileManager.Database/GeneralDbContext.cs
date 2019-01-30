@@ -3,13 +3,19 @@ using MobileManager.Appium;
 using MobileManager.Database.DatabaseContexts.Base;
 using MobileManager.Database.Extensions;
 using MobileManager.Models.Devices;
+using MobileManager.Models.Git;
 using MobileManager.Models.Logger;
 using MobileManager.Models.Reservations;
+using MobileManager.Models.Xcuitest;
 
 namespace MobileManager.Database
 {
     public class GeneralDbContext : MultiDbContext
     {
+        public GeneralDbContext()
+        {
+        }
+
         /// <inheritdoc />
         /// <summary>
         /// On model creating.
@@ -23,7 +29,9 @@ namespace MobileManager.Database
                 .GetModelMapping<ReservationApplied>()
                 .GetModelMapping<ReservedDevice>()
                 .GetModelMapping<AppiumProcess>()
-                .GetModelMapping<Device>();
+                .GetModelMapping<Device>()
+                .GetModelMapping<Xcuitest>()
+                .GetModelMapping<GitRepository>();
 
             // Cascade Delete
             modelBuilder.Entity<Reservation>()
@@ -88,5 +96,15 @@ namespace MobileManager.Database
         /// Gets or sets the Logger.
         /// </summary>
         public DbSet<LogMessage> Logger { get; set; }
+
+        /// <summary>
+        /// Gets or sets the Xcuitests.
+        /// </summary>
+        public DbSet<Xcuitest> Xcuitests { get; set; }
+        
+        /// <summary>
+        /// GitRepositories DbSet.
+        /// </summary>
+        public DbSet<GitRepository> GitRepositories { get; set; }
     }
 }

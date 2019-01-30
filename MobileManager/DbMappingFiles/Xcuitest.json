@@ -1,0 +1,65 @@
+﻿{
+    "TableNames": {
+        "MsSql": "Xcuitest",
+        "Sqlite": "Xcuitest",
+        "PostgreSql": "xcuitest"
+    },
+    "PropertyMappings": [
+        {
+            "PropertyName": "Id",
+            "Mappings": {
+                "MsSql": "Id",
+                "Sqlite": "Id",
+                "PostgreSql": "id"
+            }
+        },
+        {
+            "PropertyName": "Project",
+            "Mappings": {
+                "MsSql": "Project",
+                "Sqlite": "Project",
+                "PostgreSql": "project"
+            }
+        },
+        {
+            "PropertyName": "Scheme",
+            "Mappings": {
+                "MsSql": "Scheme",
+                "Sqlite": "Scheme",
+                "PostgreSql": "scheme"
+            }
+        },
+        {
+            "PropertyName": "Sdk",
+            "Mappings": {
+                "MsSql": "Sdk",
+                "Sqlite": "Sdk",
+                "PostgreSql": "sdk"
+            }
+        },
+        {
+            "PropertyName": "Destination",
+            "Mappings": {
+                "MsSql": "Destination",
+                "Sqlite": "Destination",
+                "PostgreSql": "destination"
+            }
+        },
+        {
+            "PropertyName": "Action",
+            "Mappings": {
+                "MsSql": "Action",
+                "Sqlite": "Action",
+                "PostgreSql": "action"
+            }
+        },
+        {
+            "PropertyName": "Results",
+            "Mappings": {
+                "MsSql": "Results",
+                "Sqlite": "Results",
+                "PostgreSql": "results"
+            }
+        }
+    ]
+}

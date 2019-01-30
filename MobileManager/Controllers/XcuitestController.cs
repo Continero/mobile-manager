@@ -7,9 +7,11 @@ using System.Net.Http;
 using Castle.Core.Internal;
 using Microsoft.AspNetCore.Mvc;
 using MobileManager.Controllers.Interfaces;
+using MobileManager.Database.Repositories.Interfaces;
 using MobileManager.Logging.Logger;
 using MobileManager.Models.Git;
 using MobileManager.Models.Xcuitest;
+using MobileManager.Models.Xcuitest.enums;
 using MobileManager.Services;
 
 namespace MobileManager.Controllers
@@ -17,19 +19,24 @@ namespace MobileManager.Controllers
     /// <inheritdoc />
     public class XcuitestController : IXcuitestController
     {
+        private const string TestReports = "TestReports";
+        private readonly IRepository<Xcuitest> _xcuitestRepository;
         private readonly IExternalProcesses _externalProcesses;
         private readonly IManagerLogger _logger;
 
-        private static readonly string GitRepositoryPath =
-            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "/mobile-manager-git-repos";
+        private static readonly string GitRepositoryPath = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "mobile-manager-git-repos");
 
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="xcuitestRepository"></param>
         /// <param name="externalProcesses"></param>
         /// <param name="logger"></param>
-        public XcuitestController(IExternalProcesses externalProcesses, IManagerLogger logger)
+        public XcuitestController(IRepository<Xcuitest> xcuitestRepository, IExternalProcesses externalProcesses,
+            IManagerLogger logger)
         {
+            _xcuitestRepository = xcuitestRepository;
             _externalProcesses = externalProcesses;
             _logger = logger;
 
@@ -61,28 +68,79 @@ namespace MobileManager.Controllers
         [HttpPost("cloneTestRepository", Name = "cloneTestRepository")]
         public IActionResult CloneTestRepository([FromBody] GitRepository gitRepository)
         {
-            var result = _externalProcesses.RunProcessAndReadOutput("git",
-                $"clone {gitRepository.Remote} {GitRepositoryPath}/{gitRepository.Name}");
+            var gitPath = Path.Combine(GitRepositoryPath, gitRepository.Name);
+
+            string result;
+            if (Directory.Exists(gitPath))
+            {
+                result = _externalProcesses.RunProcessWithBashAndReadOutput("git", "pull", gitPath);
+            }
+            else
+            {
+                result = _externalProcesses.RunProcessAndReadOutput("git",
+                    $"clone {gitRepository.Remote} {gitPath}");
+            }
 
             return new ObjectResult(result);
         }
 
         /// <inheritdoc />
         [HttpPost("runXcuitest", Name = "RunXcuitest")]
-        public HttpResponseMessage RunXcuitest([FromBody] Xcuitest xcuitest)
+        public IActionResult RunXcuitest([FromBody] Xcuitest xcuitest)
         {
             CloneTestRepository(xcuitest.GitRepository);
 
-            var gitPath = Path.Combine(GitRepositoryPath, xcuitest.GitRepository.Name, xcuitest.Project);
+            xcuitest.GitRepository.DirectoryPath = Path.Combine(GitRepositoryPath, xcuitest.GitRepository.Name);
 
-            var result = _externalProcesses.RunProcessAndReadOutput("xcodebuild",
-                $" -verbose -project \"{gitPath}\" -scheme {xcuitest.Scheme} -sdk {xcuitest.Sdk} -destination \"{xcuitest.Destination}\" {xcuitest.Action}");
-
-            var resp = new HttpResponseMessage(HttpStatusCode.OK)
+            string outputFormat;
+            var outputFile = Path.Combine(GitRepositoryPath, TestReports, xcuitest.Id.ToString());
+            switch (xcuitest.OutputFormat)
             {
-                Content = new StringContent(result, System.Text.Encoding.UTF8, "text/plain")
-            };
-            return resp;
+                case XcuitestOutputFormat.PlainText:
+                    outputFormat = $"--output {outputFile}.txt";
+                    break;
+                case XcuitestOutputFormat.Html:
+                    outputFormat = $"--report html --output {outputFile}.html";
+                    break;
+                case XcuitestOutputFormat.JunitXml:
+                    outputFormat = $"--report junit --output {outputFile}.xml";
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+            var result = _externalProcesses.RunProcessWithBashAndReadOutput(
+                "xcodebuild",
+                $"-scheme {xcuitest.Scheme} -sdk {xcuitest.Sdk} -destination \\\"{xcuitest.Destination}\\\" {xcuitest.Action}",
+                Path.Combine(GitRepositoryPath, xcuitest.GitRepository.Name),
+                $"xcpretty {outputFormat}");
+
+            xcuitest.Results = result;
+            _xcuitestRepository.Add(xcuitest);
+
+            switch (xcuitest.OutputFormat)
+            {
+                case XcuitestOutputFormat.PlainText:
+                    return new ContentResult()
+                    {
+                        Content = File.ReadAllText(outputFile + ".txt"),
+                        ContentType = "text/plain",
+                    };
+                case XcuitestOutputFormat.Html:
+                    return new ContentResult()
+                    {
+                        Content = File.ReadAllText(outputFile + ".html"),
+                        ContentType = "text/html",
+                    };
+                case XcuitestOutputFormat.JunitXml:
+                    return new ContentResult()
+                    {
+                        Content = File.ReadAllText(outputFile + ".xml"),
+                        ContentType = "text/xml",
+                    };
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
 
         /// <inheritdoc />

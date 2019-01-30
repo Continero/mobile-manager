@@ -1,4 +1,6 @@
+using System;
 using MobileManager.Models.Git;
+using MobileManager.Models.Xcuitest.enums;
 
 namespace MobileManager.Models.Xcuitest
 {
@@ -10,5 +12,8 @@ namespace MobileManager.Models.Xcuitest
         string Sdk { get; set; }
         string Destination { get; set; }
         string Action { get; set; }
+        Guid Id { get; set; }
+        string Results { get; set; }
+        XcuitestOutputFormat OutputFormat { get; set; }
     }
 }
