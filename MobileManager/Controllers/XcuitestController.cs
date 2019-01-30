@@ -17,7 +17,7 @@ using MobileManager.Services;
 namespace MobileManager.Controllers
 {
     /// <inheritdoc />
-    public class XcuitestController : IXcuitestController
+    public class XcuitestController : ControllerExtensions, IXcuitestController
     {
         private const string TestReports = "TestReports";
         private readonly IRepository<Xcuitest> _xcuitestRepository;
@@ -34,7 +34,7 @@ namespace MobileManager.Controllers
         /// <param name="externalProcesses"></param>
         /// <param name="logger"></param>
         public XcuitestController(IRepository<Xcuitest> xcuitestRepository, IExternalProcesses externalProcesses,
-            IManagerLogger logger)
+            IManagerLogger logger) : base(logger)
         {
             _xcuitestRepository = xcuitestRepository;
             _externalProcesses = externalProcesses;
@@ -92,7 +92,54 @@ namespace MobileManager.Controllers
 
             xcuitest.GitRepository.DirectoryPath = Path.Combine(GitRepositoryPath, xcuitest.GitRepository.Name);
 
-            string outputFormat;
+            var outputFile = GetOutputFormatFile(xcuitest, out var outputFormat);
+
+            var result = _externalProcesses.RunProcessWithBashAndReadOutput(
+                "xcodebuild",
+                $"-scheme {xcuitest.Scheme} -sdk {xcuitest.Sdk} -destination \\\"{xcuitest.Destination}\\\" {xcuitest.Action}",
+                Path.Combine(GitRepositoryPath, xcuitest.GitRepository.Name),
+                $"xcpretty {outputFormat}");
+
+            xcuitest.Results = result;
+            _xcuitestRepository.Add(xcuitest);
+
+            if (!Directory.EnumerateFiles(Path.Combine(GitRepositoryPath, TestReports), xcuitest.Id + ".*").Any())
+            {
+                return StatusCodeExtension(500, result);
+            }
+
+            return GetContentInValidFormat(xcuitest, outputFile);
+        }
+
+        private static IActionResult GetContentInValidFormat(IXcuitest xcuitest, string outputFile)
+        {
+            switch (xcuitest.OutputFormat)
+            {
+                case XcuitestOutputFormat.PlainText:
+                    return new ContentResult()
+                    {
+                        Content = System.IO.File.ReadAllText(outputFile + ".txt"),
+                        ContentType = "text/plain",
+                    };
+                case XcuitestOutputFormat.Html:
+                    return new ContentResult()
+                    {
+                        Content = System.IO.File.ReadAllText(outputFile + ".html"),
+                        ContentType = "text/html",
+                    };
+                case XcuitestOutputFormat.JunitXml:
+                    return new ContentResult()
+                    {
+                        Content = System.IO.File.ReadAllText(outputFile + ".xml"),
+                        ContentType = "text/xml",
+                    };
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        private static string GetOutputFormatFile(IXcuitest xcuitest, out string outputFormat)
+        {
             var outputFile = Path.Combine(GitRepositoryPath, TestReports, xcuitest.Id.ToString());
             switch (xcuitest.OutputFormat)
             {
@@ -109,38 +156,7 @@ namespace MobileManager.Controllers
                     throw new ArgumentOutOfRangeException();
             }
 
-            var result = _externalProcesses.RunProcessWithBashAndReadOutput(
-                "xcodebuild",
-                $"-scheme {xcuitest.Scheme} -sdk {xcuitest.Sdk} -destination \\\"{xcuitest.Destination}\\\" {xcuitest.Action}",
-                Path.Combine(GitRepositoryPath, xcuitest.GitRepository.Name),
-                $"xcpretty {outputFormat}");
-
-            xcuitest.Results = result;
-            _xcuitestRepository.Add(xcuitest);
-
-            switch (xcuitest.OutputFormat)
-            {
-                case XcuitestOutputFormat.PlainText:
-                    return new ContentResult()
-                    {
-                        Content = File.ReadAllText(outputFile + ".txt"),
-                        ContentType = "text/plain",
-                    };
-                case XcuitestOutputFormat.Html:
-                    return new ContentResult()
-                    {
-                        Content = File.ReadAllText(outputFile + ".html"),
-                        ContentType = "text/html",
-                    };
-                case XcuitestOutputFormat.JunitXml:
-                    return new ContentResult()
-                    {
-                        Content = File.ReadAllText(outputFile + ".xml"),
-                        ContentType = "text/xml",
-                    };
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+            return outputFile;
         }
 
         /// <inheritdoc />
