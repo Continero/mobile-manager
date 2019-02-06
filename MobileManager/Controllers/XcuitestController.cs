@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text.RegularExpressions;
 using Castle.Core.Internal;
 using Microsoft.AspNetCore.Mvc;
 using MobileManager.Controllers.Interfaces;
@@ -13,6 +14,7 @@ using MobileManager.Models.Git;
 using MobileManager.Models.Xcuitest;
 using MobileManager.Models.Xcuitest.enums;
 using MobileManager.Services;
+using Newtonsoft.Json;
 
 namespace MobileManager.Controllers
 {
@@ -48,11 +50,26 @@ namespace MobileManager.Controllers
 
         /// <inheritdoc />
         [HttpGet("availableDevices", Name = "getAvailableDevices")]
-        public IEnumerable<string> GetAvailableDevices()
+        public IEnumerable<InstrumentsDevice> GetAvailableDevices()
         {
             var result = _externalProcesses.RunProcessAndReadOutput("instruments", "-s devices");
+            var regex = new Regex(@"(.+)\s(\(\S+\))\s(\[\S+\])(\s\(Simulator\))?");
 
-            return result.Split(Environment.NewLine).FindAll(x => x.Contains("(Simulator)"));
+            var instrumentsDevices = (from line in result.Split(Environment.NewLine)
+                select regex.Match(line)
+                into res
+                where res.Success
+                select new InstrumentsDevice
+                {
+                    Name = res.Groups[1].Value,
+                    Version = res.Groups[2].Value,
+                    Id = res.Groups[3].Value,
+                    IsSimulator = !string.IsNullOrEmpty(res.Groups[4].Value),
+                }).ToList();
+
+            _logger.Debug($"{nameof(GetAvailableDevices)}: {JsonConvert.SerializeObject(instrumentsDevices)}");
+
+            return instrumentsDevices;
         }
 
         /// <inheritdoc />

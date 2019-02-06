@@ -11,20 +11,10 @@ class SafariTests(unittest.TestCase):
         desired_caps = {
             'browserName':'safari',
             'platformName':'iOS',
-            'udid':'a28e52130a4ce5b3bdd13239d690f66a7f357820',
-            'deviceName':'Batman',
-            'deviceVersion':' 11.3.1',
-            'automationName':'XCUITest',
-            'teamId':'CB52FCDD4H',
-            'signingId':'iPhone Developer',
-            'showXcodeLog': True,
-            'realDeviceLogger':'/usr/local/lib/node_modules/deviceconsole/deviceconsole',
-            'bootstrapPath':'/usr/local/lib/node_modules/appium/node_modules/appium-xcuitest-driver/WebDriverAgent',
-            'agentPath':'/usr/local/lib/node_modules/appium/node_modules/appium-xcuitest-driver/WebDriverAgent/WebDriverAgent.xcodeproj',
-            'sessionTimeout':'6000',
-            'startIWDP': True
+            'deviceName':'iPhone XS',
+            'platformVersion': '12.1'
         }
-        self.driver = webdriver.Remote('http://mobile-manager.dsg-i.com:1234/wd/hub', desired_caps)
+        self.driver = webdriver.Remote('http://127.0.0.1:1234/wd/hub', desired_caps)
 
     def tearDown(self):
         self.driver.quit()
