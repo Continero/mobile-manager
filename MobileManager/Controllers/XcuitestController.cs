@@ -111,16 +111,11 @@ namespace MobileManager.Controllers
 
             var outputFile = GetOutputFormatFile(xcuitest, out var outputFormat);
 
-//            var result = _externalProcesses.RunProcessWithBashAndReadOutput(
-//                "xcodebuild",
-//                $"-scheme {xcuitest.Scheme} -sdk {xcuitest.Sdk} -destination \\\"{xcuitest.Destination}\\\" {xcuitest.Action}",
-//                Path.Combine(GitRepositoryPath, xcuitest.GitRepository.Name),
-//                $"xcpretty {outputFormat}");
-
             var result = _externalProcesses.RunProcessWithBashAndReadOutput(
                 "xcodebuild",
                 $"-scheme {xcuitest.Scheme} -sdk {xcuitest.Sdk} -destination \\\"{xcuitest.Destination}\\\" {xcuitest.Action}",
-                Path.Combine(GitRepositoryPath, xcuitest.GitRepository.Name));
+                Path.Combine(GitRepositoryPath, xcuitest.GitRepository.Name),
+                $"xcpretty {outputFormat}");
 
             xcuitest.Results = result;
             _xcuitestRepository.Add(xcuitest);
@@ -130,9 +125,7 @@ namespace MobileManager.Controllers
                 return StatusCodeExtension(500, result);
             }
 
-            //return GetContentInValidFormat(xcuitest, outputFile);
-
-            return new OkObjectResult(outputFile);
+            return GetContentInValidFormat(xcuitest, outputFile);
         }
 
         private static IActionResult GetContentInValidFormat(IXcuitest xcuitest, string outputFile)
