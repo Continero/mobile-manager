@@ -63,7 +63,7 @@ namespace MobileManagerTests
             // Act
             var deviceUtils = new DeviceUtils(Logger, _externalProcesses);
             var restClient = new RestClient(_config.Object, new HttpClient(mockHttp), Logger);
-            var result = await deviceUtils.LockDevice(_device1.Id, restClient, mockAppiumService.Object);
+            var result = await deviceUtils.LockDeviceAppium(_device1.Id, restClient, mockAppiumService.Object);
 
             // Assert
             Assert.IsType<Device>(result);
@@ -93,7 +93,7 @@ namespace MobileManagerTests
             // Act
             var deviceUtils = new DeviceUtils(Logger, _externalProcesses);
             var restClient = new RestClient(_config.Object, new HttpClient(mockHttp), Logger);
-            var result = await deviceUtils.UnlockDevice(_device1.Id, restClient, mockAppiumService.Object);
+            var result = await deviceUtils.UnlockDeviceAppium(_device1.Id, restClient, mockAppiumService.Object);
 
             // Assert
             Assert.IsType<Device>(result);

@@ -1,4 +1,5 @@
 ﻿using System;
+using MobileManager.Models.Reservations.enums;
 
 namespace MobileManager.Models.Reservations.Interfaces
 {
@@ -30,5 +31,10 @@ namespace MobileManager.Models.Reservations.Interfaces
         /// </summary>
         /// <value>The failed to apply.</value>
         int FailedToApply { get; set; }
+
+        /// <summary>
+        /// Gets or sets the ReservationType flag.
+        /// </summary>
+        ReservationType  ReservationType { get; set; }
     }
 }

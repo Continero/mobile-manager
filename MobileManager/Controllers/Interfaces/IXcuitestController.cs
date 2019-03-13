@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using MobileManager.Models.Git;
 using MobileManager.Models.Xcuitest;
@@ -39,7 +40,7 @@ namespace MobileManager.Controllers.Interfaces
         /// <param name="xcuitest"><see cref="IXcuitest"/>></param>
         /// <returns></returns>
         [HttpPost]
-        IActionResult RunXcuitest([FromBody] Xcuitest xcuitest);
+        Task<IActionResult> RunXcuitest([FromBody] Xcuitest xcuitest);
 
         /// <summary>
         /// Gets XCUITEST result from completed test run.

@@ -6,6 +6,8 @@ namespace MobileManager.Models.Xcuitest
 {
     public interface IXcuitest
     {
+        string ReservationId { get; set; }
+
         GitRepository GitRepository { get; set; }
 
         string Project { get; set; }

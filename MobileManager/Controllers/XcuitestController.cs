@@ -5,15 +5,19 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Castle.Core.Internal;
 using Microsoft.AspNetCore.Mvc;
 using MobileManager.Controllers.Interfaces;
 using MobileManager.Database.Repositories.Interfaces;
+using MobileManager.Http.Clients.Interfaces;
 using MobileManager.Logging.Logger;
 using MobileManager.Models.Git;
+using MobileManager.Models.Reservations.enums;
 using MobileManager.Models.Xcuitest;
 using MobileManager.Models.Xcuitest.enums;
 using MobileManager.Services;
+using MobileManager.Utils;
 using Newtonsoft.Json;
 
 namespace MobileManager.Controllers
@@ -21,13 +25,9 @@ namespace MobileManager.Controllers
     /// <inheritdoc />
     public class XcuitestController : ControllerExtensions, IXcuitestController
     {
-        private const string TestReports = "TestReports";
-        private readonly IRepository<Xcuitest> _xcuitestRepository;
-        private readonly IExternalProcesses _externalProcesses;
         private readonly IManagerLogger _logger;
-
-        private static readonly string GitRepositoryPath = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "mobile-manager-git-repos");
+        private readonly XcuiTestUtils _xcuiTestUtils;
+        private readonly IRestClient _restClient;
 
         /// <summary>
         /// Constructor
@@ -35,16 +35,17 @@ namespace MobileManager.Controllers
         /// <param name="xcuitestRepository"></param>
         /// <param name="externalProcesses"></param>
         /// <param name="logger"></param>
+        /// <param name="restClient"></param>
         public XcuitestController(IRepository<Xcuitest> xcuitestRepository, IExternalProcesses externalProcesses,
-            IManagerLogger logger) : base(logger)
+            IManagerLogger logger, IRestClient restClient) : base(logger)
         {
-            _xcuitestRepository = xcuitestRepository;
-            _externalProcesses = externalProcesses;
             _logger = logger;
+            _restClient = restClient;
+            _xcuiTestUtils = new XcuiTestUtils(_logger, externalProcesses, xcuitestRepository);
 
-            if (!Directory.Exists(GitRepositoryPath))
+            if (!Directory.Exists(XcuiTestUtils.GitRepositoryPath))
             {
-                Directory.CreateDirectory(GitRepositoryPath);
+                Directory.CreateDirectory(XcuiTestUtils.GitRepositoryPath);
             }
         }
 
@@ -52,20 +53,7 @@ namespace MobileManager.Controllers
         [HttpGet("availableDevices", Name = "getAvailableDevices")]
         public IEnumerable<InstrumentsDevice> GetAvailableDevices()
         {
-            var result = _externalProcesses.RunProcessAndReadOutput("instruments", "-s devices");
-            var regex = new Regex(@"(.+)\s(\(\S+\))\s(\[\S+\])(\s\(Simulator\))?");
-
-            var instrumentsDevices = (from line in result.Split(Environment.NewLine)
-                select regex.Match(line)
-                into res
-                where res.Success
-                select new InstrumentsDevice
-                {
-                    Name = res.Groups[1].Value,
-                    Version = res.Groups[2].Value,
-                    Id = res.Groups[3].Value,
-                    IsSimulator = !string.IsNullOrEmpty(res.Groups[4].Value),
-                }).ToList();
+            var instrumentsDevices = _xcuiTestUtils.GetInstrumentsDevices();
 
             _logger.Debug($"{nameof(GetAvailableDevices)}: {JsonConvert.SerializeObject(instrumentsDevices)}");
 
@@ -76,7 +64,7 @@ namespace MobileManager.Controllers
         [HttpGet("availableRepositories", Name = "getAvailableRepositories")]
         public IEnumerable<IGitRepository> GetAvailableRepositories()
         {
-            var directories = Directory.GetDirectories(GitRepositoryPath);
+            var directories = Directory.GetDirectories(XcuiTestUtils.GitRepositoryPath);
 
             return directories.Select(directory => new GitRepository {Name = directory}).ToList();
         }
@@ -85,96 +73,49 @@ namespace MobileManager.Controllers
         [HttpPost("cloneTestRepository", Name = "cloneTestRepository")]
         public IActionResult CloneTestRepository([FromBody] GitRepository gitRepository)
         {
-            var gitPath = Path.Combine(GitRepositoryPath, gitRepository.Name);
+            var gitPath = Path.Combine(XcuiTestUtils.GitRepositoryPath, gitRepository.Name);
 
-            string result;
-            if (Directory.Exists(gitPath))
-            {
-                result = _externalProcesses.RunProcessWithBashAndReadOutput("git", "pull", gitPath);
-            }
-            else
-            {
-                result = _externalProcesses.RunProcessAndReadOutput("git",
-                    $"clone {gitRepository.Remote} {gitPath}");
-            }
+            var result = _xcuiTestUtils.CloneOrPullGitRepository(gitRepository, gitPath);
 
             return new ObjectResult(result);
         }
 
         /// <inheritdoc />
         [HttpPost("runXcuitest", Name = "RunXcuitest")]
-        public IActionResult RunXcuitest([FromBody] Xcuitest xcuitest)
+        public async Task<IActionResult> RunXcuitest([FromBody] Xcuitest xcuitest)
         {
+            if (string.IsNullOrEmpty(xcuitest.ReservationId))
+            {
+                return BadRequestExtension("ReservationId is empty. Can only run XcuiTests on reserved devices.");
+            }
+
+            var reservation = await _restClient.GetAppliedReservation(xcuitest.ReservationId);
+
+            if (reservation == null)
+            {
+                return BadRequestExtension("Invalid ReservationId does not exist in ReservationApplied.");
+            }
+
+            if (reservation.ReservationType != ReservationType.XcuiTest)
+            {
+                return BadRequestExtension(
+                    $"Invalid {nameof(reservation.ReservationType)}. Only {ReservationType.XcuiTest} is available to run XcuiTests.");
+            }
+
             CloneTestRepository(xcuitest.GitRepository);
 
-            xcuitest.GitRepository.DirectoryPath = Path.Combine(GitRepositoryPath, xcuitest.GitRepository.Name);
+            var outputFile = _xcuiTestUtils.RunXcuiTest(xcuitest, out var outputFormat, out var result);
 
-            var outputFile = GetOutputFormatFile(xcuitest, out var outputFormat);
-
-            var result = _externalProcesses.RunProcessWithBashAndReadOutput(
-                "xcodebuild",
-                $"-scheme {xcuitest.Scheme} -sdk {xcuitest.Sdk} -destination \\\"{xcuitest.Destination}\\\" {xcuitest.Action}",
-                Path.Combine(GitRepositoryPath, xcuitest.GitRepository.Name),
-                $"xcpretty {outputFormat}");
-
-            xcuitest.Results = result;
-            _xcuitestRepository.Add(xcuitest);
-
-            if (!Directory.EnumerateFiles(Path.Combine(GitRepositoryPath, TestReports), xcuitest.Id + ".*").Any())
+            if (!Directory.EnumerateFiles(Path.Combine(XcuiTestUtils.GitRepositoryPath, XcuiTestUtils.TestReports),
+                xcuitest.Id + ".*").Any())
             {
                 return StatusCodeExtension(500, result);
             }
 
-            return GetContentInValidFormat(xcuitest, outputFile);
+            return _xcuiTestUtils.GetContentInValidFormat(xcuitest, outputFile);
         }
 
-        private static IActionResult GetContentInValidFormat(IXcuitest xcuitest, string outputFile)
-        {
-            switch (xcuitest.OutputFormat)
-            {
-                case XcuitestOutputFormat.PlainText:
-                    return new ContentResult()
-                    {
-                        Content = System.IO.File.ReadAllText(outputFile + ".txt"),
-                        ContentType = "text/plain",
-                    };
-                case XcuitestOutputFormat.Html:
-                    return new ContentResult()
-                    {
-                        Content = System.IO.File.ReadAllText(outputFile + ".html"),
-                        ContentType = "text/html",
-                    };
-                case XcuitestOutputFormat.JunitXml:
-                    return new ContentResult()
-                    {
-                        Content = System.IO.File.ReadAllText(outputFile + ".xml"),
-                        ContentType = "text/xml",
-                    };
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-        }
 
-        private static string GetOutputFormatFile(IXcuitest xcuitest, out string outputFormat)
-        {
-            var outputFile = Path.Combine(GitRepositoryPath, TestReports, xcuitest.Id.ToString());
-            switch (xcuitest.OutputFormat)
-            {
-                case XcuitestOutputFormat.PlainText:
-                    outputFormat = $"--output {outputFile}.txt";
-                    break;
-                case XcuitestOutputFormat.Html:
-                    outputFormat = $"--report html --output {outputFile}.html";
-                    break;
-                case XcuitestOutputFormat.JunitXml:
-                    outputFormat = $"--report junit --output {outputFile}.xml";
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-
-            return outputFile;
-        }
 
         /// <inheritdoc />
         public IActionResult GetXcuitestResultArtifact(string id)

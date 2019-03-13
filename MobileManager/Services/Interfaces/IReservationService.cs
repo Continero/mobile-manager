@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using MobileManager.Models.Devices;
 using MobileManager.Models.Reservations;
+using MobileManager.Models.Reservations.Interfaces;
 
 namespace MobileManager.Services.Interfaces
 {

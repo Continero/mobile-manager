@@ -4,6 +4,7 @@ using MobileManager.Http.Clients.Interfaces;
 using MobileManager.Models.Devices;
 using MobileManager.Models.Devices.Enums;
 using MobileManager.Models.Devices.Interfaces;
+using MobileManager.Models.Reservations.Interfaces;
 using MobileManager.Services.Interfaces;
 
 namespace MobileManager.Utils
@@ -14,14 +15,33 @@ namespace MobileManager.Utils
     public interface IDeviceUtils
     {
         /// <summary>
-        /// Locks the device.
+        /// Locks the device for Appium.
         /// </summary>
         /// <returns>The device.</returns>
         /// <param name="deviceId">Device identifier.</param>
         /// <param name="restClient">Rest client.</param>
         /// <param name="appiumService">Appium service.</param>
-        Task<Device> LockDevice(string deviceId, IRestClient restClient,
+        /// <returns>Updated device.</returns>
+        Task<Device> LockDeviceAppium(string deviceId, IRestClient restClient,
             IAppiumService appiumService);
+
+        /// <summary>
+        /// Locks the device for XcuiTests.
+        /// </summary>
+        /// <returns>The device.</returns>
+        /// <param name="deviceId">Device identifier.</param>
+        /// <param name="restClient">Rest client.</param>
+        /// <returns>Updated device.</returns>
+        Task<Device> LockDeviceXcuiTest(string deviceId, IRestClient restClient);
+
+        /// <summary>
+        /// Locks the device for Manual.
+        /// </summary>
+        /// <returns>The device.</returns>
+        /// <param name="deviceId">Device identifier.</param>
+        /// <param name="restClient">Rest client.</param>
+        /// <returns>Updated device.</returns>
+        Task<Device> LockDeviceManual(string deviceId, IRestClient restClient);
 
         /// <summary>
         /// Unlocks the device.
@@ -30,8 +50,27 @@ namespace MobileManager.Utils
         /// <param name="deviceId">Device identifier.</param>
         /// <param name="restClient">Rest client.</param>
         /// <param name="appiumService">Appium service.</param>
-        Task<Device> UnlockDevice(string deviceId, IRestClient restClient,
+        /// <returns>Updated device.</returns>
+        Task<Device> UnlockDeviceAppium(string deviceId, IRestClient restClient,
             IAppiumService appiumService);
+
+        /// <summary>
+        /// Unlocks the device from XcuiTest.
+        /// </summary>
+        /// <returns>The device.</returns>
+        /// <param name="deviceId">Device identifier.</param>
+        /// <param name="restClient">Rest client.</param>
+        /// <returns>Updated device.</returns>
+        Task<Device> UnlockDeviceXcuiTest(string deviceId, IRestClient restClient);
+
+        /// <summary>
+        /// Unlocks the device from Manual.
+        /// </summary>
+        /// <returns>The device.</returns>
+        /// <param name="deviceId">Device identifier.</param>
+        /// <param name="restClient">Rest client.</param>
+        /// <returns>Updated device.</returns>
+        Task<Device> UnlockDeviceManual(string deviceId, IRestClient restClient);
 
         /// <summary>
         /// Finds the matching device.
@@ -57,5 +96,16 @@ namespace MobileManager.Utils
         /// <returns><see cref="Task"/>.</returns>
         Task CheckAllDevicesInDevicePoolAreOnline(IReadOnlyCollection<string> checkedDeviceIds,
             DeviceType deviceType, IRestClient restClient);
+
+        /// <summary>
+        /// Unlocks the device by reservation ReservationType.
+        /// </summary>
+        /// <param name="reservation">reservation.</param>
+        /// <param name="reserveDevice">reserved device.</param>
+        /// <param name="restClient"></param>
+        /// <param name="appiumService"></param>
+        /// <returns></returns>
+        Task UnlockDeviceByReservationType(IReservation reservation, ReservedDevice reserveDevice,
+            IRestClient restClient, IAppiumService appiumService);
     }
 }

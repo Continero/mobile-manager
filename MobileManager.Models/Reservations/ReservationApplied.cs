@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using MobileManager.Models.Devices;
+using MobileManager.Models.Reservations.enums;
 using MobileManager.Models.Reservations.Interfaces;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace MobileManager.Models.Reservations
 {
@@ -69,5 +71,9 @@ namespace MobileManager.Models.Reservations
         /// <value>The failed to apply.</value>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
         public int FailedToApply { get; set; }
+
+        /// <inheritdoc />
+        [JsonConverter(typeof(StringEnumConverter))]
+        public ReservationType ReservationType { get; set; }
     }
 }

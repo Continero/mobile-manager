@@ -12,6 +12,8 @@ using MobileManager.Logging.Logger;
 using MobileManager.Models.Devices;
 using MobileManager.Models.Devices.Interfaces;
 using MobileManager.Models.Reservations;
+using MobileManager.Models.Reservations.enums;
+using MobileManager.Models.Reservations.Interfaces;
 using MobileManager.Services.Interfaces;
 using MobileManager.Utils;
 using Newtonsoft.Json;
@@ -26,11 +28,11 @@ namespace MobileManager.Services
     {
         private readonly IManagerLogger _logger;
 
-        private RestClient RestClient { get; }
-
+        private readonly RestClient _restClient;
         private readonly AppiumService _appiumService;
         private Task _reservationService;
         private readonly DeviceUtils _deviceUtils;
+        private readonly ReservationUtils _reservationUtils;
 
 
         /// <summary>
@@ -42,8 +44,9 @@ namespace MobileManager.Services
             _logger = logger;
             var externalProcesses1 = externalProcesses;
             _deviceUtils = new DeviceUtils(_logger, externalProcesses1);
-            RestClient = new RestClient(configuration, _logger);
+            _restClient = new RestClient(configuration, _logger);
             _appiumService = new AppiumService(configuration, logger, externalProcesses1);
+            _reservationUtils = new ReservationUtils(_logger,_deviceUtils,_appiumService,_restClient);
         }
 
         /// <inheritdoc />
@@ -80,7 +83,7 @@ namespace MobileManager.Services
                 try
                 {
                     var applied = false;
-                    if (await RestClient.TryToConnect())
+                    if (await _restClient.TryToConnect())
                     {
                         _logger.Info("ApplyAvailableReservations [START]");
                         try
@@ -94,11 +97,11 @@ namespace MobileManager.Services
 
                         _logger.Info("ApplyAvailableReservations: " + applied + " [STOP]");
 
-                        Thread.Sleep((await RestClient.GetManagerConfiguration()).ReservationServiceRefreshTime);
+                        Thread.Sleep((await _restClient.GetManagerConfiguration()).ReservationServiceRefreshTime);
                     }
                     else
                     {
-                        _logger.Error("ApplyAvailableReservations: Failed connecting to " + RestClient.Endpoint +
+                        _logger.Error("ApplyAvailableReservations: Failed connecting to " + _restClient.Endpoint +
                                       " [STOP]");
                         var sleep = AppConfigurationProvider.Get<ManagerConfiguration>().GlobalReconnectTimeout;
                         _logger.Info("ApplyAvailableReservations Sleep for [ms]: " + sleep);
@@ -139,12 +142,12 @@ namespace MobileManager.Services
                 var reservationEligible = true;
                 if (reservation.RequestedDevices.Count > 1)
                 {
-                    reservationEligible = await IsReservationEligible(reservation);
+                    reservationEligible = await _reservationUtils.IsReservationEligible(reservation);
                 }
 
                 if (reservationEligible)
                 {
-                    await ReserveAllRequestedDevices(reservation, reservedDevices);
+                    await _reservationUtils.ReserveAllRequestedDevices(reservation, reservedDevices);
                 }
                 else
                 {
@@ -154,27 +157,26 @@ namespace MobileManager.Services
 
                 if (reservedDevices.Count == reservation.RequestedDevices.Count)
                 {
-                    //ICollection<ReservationApplied> reservationApplied = null;
                     try
                     {
-                        var reservationApplied = await AddAppliedReservation(appliedReservations, reservation,
+                        var reservationApplied = await _reservationUtils.AddAppliedReservation(appliedReservations, reservation,
                             reservedDevices);
                         appliedReservations.AddRange(reservationApplied);
                     }
                     catch (Exception e)
                     {
                         _logger.Error($"Failed to AddAppliedReservation.", e);
-                        await UnlockAllReservedDevices(reservedDevices);
+                        await _reservationUtils.UnlockAllReservedDevicesForFailedReservation(reservation, reservedDevices);
                         continue;
                     }
 
                     _logger.Info(
                         $"Applying reservation - removing reservation from queue: {JsonConvert.SerializeObject(reservation)}");
-                    await RestClient.DeleteReservation(reservation.Id);
+                    await _restClient.DeleteReservation(reservation.Id);
                 }
                 else if (reservedDevices.Any())
                 {
-                    await UnlockAllReservedDevices(reservedDevices);
+                    await _reservationUtils.UnlockAllReservedDevicesForFailedReservation(reservation, reservedDevices);
                 }
             }
 
@@ -190,142 +192,12 @@ namespace MobileManager.Services
         /// <returns>The reservation queue.</returns>
         public async Task<IEnumerable<Reservation>> LoadReservationQueue()
         {
-            return await RestClient.GetReservations();
+            return await _restClient.GetReservations();
         }
 
         #region privateMethods
 
-        private async Task UnlockAllReservedDevices(List<ReservedDevice> reservedDevices)
-        {
-            _logger.Error(
-                $"Applying reservation - failed to lock all requested devices: {JsonConvert.SerializeObject(reservedDevices)}");
-            foreach (var reserveDevice in reservedDevices)
-            {
-                _logger.Debug($"Applying reservation - unlock device: {JsonConvert.SerializeObject(reserveDevice)}");
-                if (!(await _deviceUtils.UnlockDevice(reserveDevice.DeviceId, RestClient, _appiumService)).Available)
-                {
-                    throw new Exception(
-                        "Applying reservation failed to lock all. ReservationService failed to unlock device " +
-                        reserveDevice.DeviceId);
-                }
-            }
-        }
 
-        private async Task<ICollection<ReservationApplied>> AddAppliedReservation(
-            ICollection<ReservationApplied> appliedReservations, Reservation reservation,
-            List<ReservedDevice> reservedDevices)
-        {
-            _logger.Debug(
-                $"Applying reservation - all devices are locked: {JsonConvert.SerializeObject(reservedDevices)}");
-            reservation.Available = true;
-            var reservationToBeApplied = new ReservationApplied(reservation.Id)
-            {
-                ReservedDevices = reservedDevices,
-                Available = true
-            };
-
-            _logger.Debug(
-                $"Applying reservation - adding reservation applied: {JsonConvert.SerializeObject(reservationToBeApplied)}");
-            var appliedReservation = await RestClient.ApplyReservation(reservationToBeApplied);
-            appliedReservations.Add(appliedReservation);
-
-            return appliedReservations;
-        }
-
-        private async Task ReserveAllRequestedDevices(Reservation reservation, List<ReservedDevice> reservedDevices)
-        {
-            foreach (var requestedDevice in reservation.RequestedDevices)
-            {
-                //var device = await RestClient.GetDevice(requestedDevice.DeviceId);
-
-                var device = await _deviceUtils.FindMatchingDevice(requestedDevice, RestClient);
-
-                if (device == null)
-                {
-                    _logger.Error("Device " + JsonConvert.SerializeObject(requestedDevice) + " not found.");
-                    continue;
-                }
-
-                _logger.Debug($"Applying reservation - device is found: {JsonConvert.SerializeObject(device)}");
-
-                if (!reservation.Available && await IsDeviceAvailable(device))
-                {
-                    _logger.Debug($"Applying reservation - locking device: {JsonConvert.SerializeObject(device)}");
-                    try
-                    {
-                        var updatedDevice = await _deviceUtils.LockDevice(device.Id, RestClient, _appiumService);
-                        if (!updatedDevice.Available)
-                        {
-                            _logger.Debug(
-                                $"Applying reservation - failed to lock device: {JsonConvert.SerializeObject(updatedDevice)}");
-                            ReservedDevice reservedDevice = new ReservedDevice(updatedDevice);
-                            reservedDevices.Add(reservedDevice);
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        _logger.Error($"Failed to apply reservation {reservation.Id}", e);
-                        reservation.FailedToApply++;
-                        await RestClient.UpdateReservation(reservation);
-                    }
-                }
-            }
-        }
-
-        private async Task<bool> IsReservationEligible(Reservation reservation)
-        {
-            var reservationAligable = true;
-            _logger.Debug(
-                $"Applying reservation - contains multiple devices: {JsonConvert.SerializeObject(reservation.RequestedDevices)}");
-
-            var listOfLockedDevices = new List<Device>();
-
-            foreach (var requestedDevice in reservation.RequestedDevices)
-            {
-                var device = await _deviceUtils.FindMatchingDevice(requestedDevice, RestClient);
-
-                if (device == null)
-                {
-                    _logger.Error("Device " + JsonConvert.SerializeObject(requestedDevice) + " not found.");
-                    reservationAligable = false;
-                    continue;
-                }
-
-                if (!device.Available)
-                {
-                    _logger.Debug(
-                        $"Applying reservation - device is not available: {device.Id}");
-                    reservationAligable = false;
-                }
-                else
-                {
-                    device.Available = false;
-                    listOfLockedDevices.Add(await RestClient.UpdateDevice(device));
-                    _logger.Debug($"Applying reservation - device is available: {device.Id}");
-                }
-            }
-
-            if (!reservationAligable)
-            {
-                var tasks = new List<Task>();
-
-                foreach (var lockedDevice in listOfLockedDevices)
-                {
-                    lockedDevice.Available = true;
-                    tasks.Add(RestClient.UpdateDevice(lockedDevice));
-                }
-
-                await Task.WhenAll(tasks);
-            }
-
-            return reservationAligable;
-        }
-
-        private async Task<bool> IsDeviceAvailable(IDevice device)
-        {
-            var dev = await RestClient.GetDevice(device.Id);
-            return dev.Available;
-        }
 
         #endregion
     }

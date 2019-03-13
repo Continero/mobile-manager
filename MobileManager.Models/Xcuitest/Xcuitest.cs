@@ -19,6 +19,9 @@ namespace MobileManager.Models.Xcuitest
         public Guid Id { get; set; }
 
         /// <inheritdoc />
+        public string ReservationId { get; set; }
+
+        /// <inheritdoc />
         public GitRepository GitRepository { get; set; }
 
         /// <inheritdoc />

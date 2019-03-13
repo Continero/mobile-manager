@@ -28,9 +28,8 @@ namespace MobileManager.Controllers
         private readonly IRestClient _restClient;
         private readonly IAppiumService _appiumService;
         private readonly IManagerLogger _logger;
-        private readonly DeviceUtils _deviceUtils;
+        private readonly IDeviceUtils _deviceUtils;
         private readonly IExternalProcesses _externalProcesses;
-
 
         /// <inheritdoc />
         /// <summary>
@@ -41,16 +40,17 @@ namespace MobileManager.Controllers
         /// <param name="appiumService">Appium service.</param>
         /// <param name="logger">Logger.</param>
         /// <param name="externalProcesses"></param>
+        /// <param name="deviceUtils"></param>
         public ReservationsAppliedController(IRepository<ReservationApplied> reservationsAppliedRepository,
             IRestClient restClient, IAppiumService appiumService, IManagerLogger logger,
-            IExternalProcesses externalProcesses) : base(logger)
+            IExternalProcesses externalProcesses, IDeviceUtils deviceUtils) : base(logger)
         {
             _reservationsAppliedRepository = reservationsAppliedRepository;
             _restClient = restClient;
             _appiumService = appiumService;
             _logger = logger;
             _externalProcesses = externalProcesses;
-            _deviceUtils = new DeviceUtils(_logger, _externalProcesses);
+            _deviceUtils = deviceUtils;
         }
 
         /// <summary>
@@ -153,13 +153,7 @@ namespace MobileManager.Controllers
             {
                 try
                 {
-                    //todo: change to exception handling when UnlockDevice is developed
-                    if (!(await _deviceUtils.UnlockDevice(reservedDevice.DeviceId, _restClient, _appiumService))
-                        .Available)
-                    {
-                        return StatusCodeExtension(500,
-                            "Failed to unlock device id: " + reservedDevice.DeviceId + " from reservation.");
-                    }
+                    await _deviceUtils.UnlockDeviceByReservationType(reservationFromApplied, reservedDevice, _restClient, _appiumService);
                 }
                 catch (Exception ex)
                 {
