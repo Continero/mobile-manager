@@ -171,9 +171,21 @@ namespace MobileManager.Utils
         {
             var outputFile = GetOutputFormatFile(xcuitest, out outputFormat);
 
+            var onlyTesting = string.Empty;
+            if (!string.IsNullOrEmpty(xcuitest.OnlyTestingOption))
+            {
+                onlyTesting = $"-only-testing:{xcuitest.OnlyTestingOption}";
+            }
+
+            var workspace = string.Empty;
+            if (!string.IsNullOrEmpty(xcuitest.Workspace))
+            {
+                workspace = $"-workspace {xcuitest.Workspace}";
+            }
+
             result = _externalProcesses.RunProcessWithBashAndReadOutput(
                 "xcodebuild",
-                $"-scheme {xcuitest.Scheme} -sdk {xcuitest.Sdk} -destination \\\"{xcuitest.Destination}\\\" {xcuitest.Action}",
+                $"{workspace} -scheme {xcuitest.Scheme} -sdk {xcuitest.Sdk} -destination \\\"{xcuitest.Destination}\\\" {onlyTesting} {xcuitest.Action}",
                 Path.Combine(GitRepositoryPath, xcuitest.Project),
                 $"xcpretty {outputFormat}");
 

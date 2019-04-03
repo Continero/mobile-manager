@@ -40,6 +40,11 @@ namespace MobileManager.Models.Xcuitest
         public string Action { get; set; }
 
         /// <inheritdoc />
+        public string Workspace { get; set; }
+
+        public string OnlyTestingOption { get; set; }
+
+        /// <inheritdoc />
         public bool InstallCocoaPods { get; set; }
 
         /// <inheritdoc />
