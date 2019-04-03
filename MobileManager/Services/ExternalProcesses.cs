@@ -147,6 +147,41 @@ namespace MobileManager.Services
             return output + errorOutput;
         }
 
+        /// <inheritdoc />
+        public string RunScriptWithBashAndReadOutput(string scriptLine, string workingDirectory = "", string pipe = "", int timeout = 5000)
+        {
+            _logger.Debug(
+                $"{nameof(RunProcessWithBashAndReadOutput)} scriptLine [{scriptLine}], workingDir [{workingDirectory}], pipe [{pipe}]");
+
+            var psi = new ProcessStartInfo()
+            {
+                FileName = "/bin/bash",
+                Arguments =
+                    $"-c \"{scriptLine}{(string.IsNullOrEmpty(pipe) ? string.Empty : " | " + pipe)}\"",
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                WorkingDirectory = workingDirectory
+            };
+            var proc = new Process
+            {
+                StartInfo = psi
+            };
+
+            proc.Start();
+
+            proc.WaitForExit(timeout);
+
+            var output = proc.StandardOutput.ReadToEnd();
+            _logger.Debug(string.Format("RunProcessAndReadOutput output: [{0}]", string.Join("\n", output)));
+
+            var errorOutput = proc.StandardError.ReadToEnd();
+            _logger.Debug(string.Format("RunProcessAndReadOutput errorOutput: [{0}]",
+                string.Join("\n", errorOutput)));
+
+            return output + errorOutput;
+        }
+
         /// <summary>
         /// Runs the shell process.
         /// </summary>

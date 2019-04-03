@@ -107,11 +107,7 @@ namespace MobileManager.Controllers
                 CloneTestRepository(xcuitest.GitRepository);
             }
 
-            if (xcuitest.InstallCocoaPods)
-            {
-                _xcuiTestUtils.InstallCocoaPodBundles(Path.Combine(XcuiTestUtils.GitRepositoryPath,
-                    xcuitest.Project));
-            }
+            _xcuiTestUtils.RunCustomPreBuildScript(xcuitest);
 
             var outputFile = _xcuiTestUtils.RunXcuiTest(xcuitest, out var outputFormat, out var result);
 
@@ -129,7 +125,6 @@ namespace MobileManager.Controllers
 
             //return _xcuiTestUtils.GetContentInValidFormat(xcuitest, outputFile);
         }
-
 
 
         /// <inheritdoc />

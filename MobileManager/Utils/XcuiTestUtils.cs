@@ -204,5 +204,22 @@ namespace MobileManager.Utils
             var output = _externalProcesses.RunProcessAndReadOutput("bundle", "exec pod install", directory, 600000);
             _logger.Debug($"{nameof(InstallCocoaPodBundles)}: [{output}]");
         }
+
+        /// <summary>
+        /// Runs custom prebuilt script for each script line in working directory.
+        /// </summary>
+        /// <param name="xcuitest"></param>
+        /// <exception cref="NotImplementedException"></exception>
+        public void RunCustomPreBuildScript(Xcuitest xcuitest)
+        {
+            var outputFile = Path.Combine(GitRepositoryPath, TestReports, xcuitest.Id.ToString()) +
+                             "_CustomPreBuildScript.txt";
+
+            foreach (var scriptLine in xcuitest.CustomPreBuildScript.ScriptLine)
+            {
+                _externalProcesses.RunScriptWithBashAndReadOutput(scriptLine,
+                    xcuitest.CustomPreBuildScript.WorkingDirectory, $"tee -a {outputFile}");
+            }
+        }
     }
 }

@@ -38,6 +38,9 @@
             string pipe = "",
             int timeout = 5000);
 
+        string RunScriptWithBashAndReadOutput(string scriptLine, string workingDirectory = "", string pipe = "",
+            int timeout = 5000);
+
         /// <summary>
         /// Runs the shell process.
         /// </summary>

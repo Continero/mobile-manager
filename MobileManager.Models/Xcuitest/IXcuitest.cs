@@ -24,12 +24,12 @@ namespace MobileManager.Models.Xcuitest
 
         string OnlyTestingOption { get; set; }
 
-        bool InstallCocoaPods { get; set; }
-
         Guid Id { get; set; }
 
         string Results { get; set; }
 
         XcuitestOutputFormat OutputFormat { get; set; }
+
+        CustomBashScript CustomPreBuildScript { get; set; }
     }
 }
