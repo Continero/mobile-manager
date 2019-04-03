@@ -169,9 +169,6 @@ namespace MobileManager.Utils
 
         public string RunXcuiTest(Xcuitest xcuitest, out string outputFormat, out string result)
         {
-            xcuitest.GitRepository.DirectoryPath =
-                Path.Combine(GitRepositoryPath, xcuitest.Project);
-
             var outputFile = GetOutputFormatFile(xcuitest, out outputFormat);
 
             result = _externalProcesses.RunProcessWithBashAndReadOutput(
