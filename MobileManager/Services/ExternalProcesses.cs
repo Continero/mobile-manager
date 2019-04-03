@@ -179,6 +179,11 @@ namespace MobileManager.Services
             _logger.Debug(string.Format("RunProcessAndReadOutput errorOutput: [{0}]",
                 string.Join("\n", errorOutput)));
 
+            if (!string.IsNullOrEmpty(errorOutput))
+            {
+                throw new Exception(errorOutput);
+            }
+
             return output + errorOutput;
         }
 
