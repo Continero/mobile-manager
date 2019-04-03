@@ -223,8 +223,10 @@ namespace MobileManager.Utils
 
             foreach (var scriptLine in xcuitest.CustomPreBuildScript.ScriptLine)
             {
-                _externalProcesses.RunScriptWithBashAndReadOutput(scriptLine,
+                var output = _externalProcesses.RunScriptWithBashAndReadOutput(scriptLine,
                     workingDir, $"tee -a {outputFile}");
+
+                _logger.Debug($"{nameof(RunCustomPreBuildScript)}: [{output}]");
             }
         }
     }
