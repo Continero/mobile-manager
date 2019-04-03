@@ -170,6 +170,7 @@ namespace MobileManager.Utils
         public string RunXcuiTest(Xcuitest xcuitest, out string outputFormat, out string result)
         {
             var outputFile = GetOutputFormatFile(xcuitest, out outputFormat);
+            outputFile = Path.Combine(GitRepositoryPath, TestReports, xcuitest.Id.ToString()) + ".txt";
 
             var onlyTesting = string.Empty;
             if (!string.IsNullOrEmpty(xcuitest.OnlyTestingOption))
@@ -187,7 +188,7 @@ namespace MobileManager.Utils
                 "xcodebuild",
                 $"{workspace} -scheme {xcuitest.Scheme} -sdk {xcuitest.Sdk} -destination \\\"{xcuitest.Destination}\\\" {onlyTesting} {xcuitest.Action}",
                 Path.Combine(GitRepositoryPath, xcuitest.Project),
-                $"xcpretty {outputFormat}");
+                $"tee {outputFile}");
 
             xcuitest.Results = result;
             _xcuitestRepository.Add(xcuitest);
