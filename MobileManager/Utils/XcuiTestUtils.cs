@@ -39,7 +39,8 @@ namespace MobileManager.Utils
         /// </summary>
         /// <param name="logger"></param>
         /// <param name="externalProcesses"></param>
-        public XcuiTestUtils(IManagerLogger logger, IExternalProcesses externalProcesses, IRepository<Xcuitest> xcuitestRepository)
+        public XcuiTestUtils(IManagerLogger logger, IExternalProcesses externalProcesses,
+            IRepository<Xcuitest> xcuitestRepository)
         {
             _logger = logger;
             _externalProcesses = externalProcesses;
@@ -141,12 +142,16 @@ namespace MobileManager.Utils
         /// <returns></returns>
         public string CloneOrPullGitRepository(GitRepository gitRepository, string gitPath)
         {
-            string result;
+            string result = string.Empty;
             if (Directory.Exists(gitPath))
             {
                 _logger.Debug($"{nameof(CloneOrPullGitRepository)}: Clean git repository and pull new changes.");
 
-                result = _externalProcesses.RunProcessWithBashAndReadOutput("git", "clean -xdf", gitPath);
+                if (gitRepository.CleanRepository)
+                {
+                    result = _externalProcesses.RunProcessWithBashAndReadOutput("git", "clean -xdf", gitPath);
+                }
+
                 result += _externalProcesses.RunProcessWithBashAndReadOutput("git", "pull", gitPath);
 
                 _logger.Debug($"{nameof(CloneOrPullGitRepository)}: CLEAN + PULL: result=[{result}]");
@@ -165,19 +170,29 @@ namespace MobileManager.Utils
         public string RunXcuiTest(Xcuitest xcuitest, out string outputFormat, out string result)
         {
             xcuitest.GitRepository.DirectoryPath =
-                Path.Combine(XcuiTestUtils.GitRepositoryPath, xcuitest.GitRepository.Name);
+                Path.Combine(GitRepositoryPath, xcuitest.Project);
 
             var outputFile = GetOutputFormatFile(xcuitest, out outputFormat);
 
             result = _externalProcesses.RunProcessWithBashAndReadOutput(
                 "xcodebuild",
                 $"-scheme {xcuitest.Scheme} -sdk {xcuitest.Sdk} -destination \\\"{xcuitest.Destination}\\\" {xcuitest.Action}",
-                Path.Combine(XcuiTestUtils.GitRepositoryPath, xcuitest.GitRepository.Name),
+                Path.Combine(GitRepositoryPath, xcuitest.Project),
                 $"xcpretty {outputFormat}");
 
             xcuitest.Results = result;
             _xcuitestRepository.Add(xcuitest);
             return outputFile;
+        }
+
+        /// <summary>
+        /// Runs cocoa pod installation in directory.
+        /// </summary>
+        /// <param name="directory"></param>
+        public void InstallCocoaPodBundles(string directory)
+        {
+            var output = _externalProcesses.RunProcessAndReadOutput("bundle", "exec pod install", directory, 600000);
+            _logger.Debug($"{nameof(InstallCocoaPodBundles)}: [{output}]");
         }
     }
 }

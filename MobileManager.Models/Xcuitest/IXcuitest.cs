@@ -20,6 +20,8 @@ namespace MobileManager.Models.Xcuitest
 
         string Action { get; set; }
 
+        bool InstallCocoaPods { get; set; }
+
         Guid Id { get; set; }
 
         string Results { get; set; }

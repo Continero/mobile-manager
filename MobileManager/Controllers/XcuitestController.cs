@@ -102,7 +102,16 @@ namespace MobileManager.Controllers
                     $"Invalid {nameof(reservation.ReservationType)}. Only {ReservationType.XcuiTest} is available to run XcuiTests.");
             }
 
-            CloneTestRepository(xcuitest.GitRepository);
+            if (xcuitest.GitRepository != null)
+            {
+                CloneTestRepository(xcuitest.GitRepository);
+            }
+
+            if (xcuitest.InstallCocoaPods)
+            {
+                _xcuiTestUtils.InstallCocoaPodBundles(Path.Combine(XcuiTestUtils.GitRepositoryPath,
+                    xcuitest.Project));
+            }
 
             var outputFile = _xcuiTestUtils.RunXcuiTest(xcuitest, out var outputFormat, out var result);
 

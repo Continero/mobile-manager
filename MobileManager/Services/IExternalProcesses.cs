@@ -20,6 +20,17 @@
         /// <returns>The process and read output.</returns>
         /// <param name="processName">Process name.</param>
         /// <param name="processArgs">Process arguments.</param>
+        /// <param name="workingDirectory">Directory where to execute process.</param>
+        /// <param name="timeout">Timeout.</param>
+        string RunProcessAndReadOutput(string processName, string processArgs, string workingDirectory,
+            int timeout = 5000);
+
+        /// <summary>
+        /// Runs the process and read output.
+        /// </summary>
+        /// <returns>The process and read output.</returns>
+        /// <param name="processName">Process name.</param>
+        /// <param name="processArgs">Process arguments.</param>
         /// <param name="workingDirectory">Working directory</param>
         /// <param name="pipe">Pipe output to another binary.</param>
         /// <param name="timeout">Timeout.</param>

@@ -75,6 +75,40 @@ namespace MobileManager.Services
             return output + errorOutput;
         }
 
+        /// <inheritdoc />
+        public string RunProcessAndReadOutput(string processName, string processArgs, string workingDirectory, int timeout = 5000)
+        {
+            _logger.Debug(string.Format("RunProcessAndReadOutput processName: [{0}] args: [{1}]", processName,
+                processArgs));
+
+            var psi = new ProcessStartInfo()
+            {
+                FileName = processName,
+                Arguments = processArgs,
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                WorkingDirectory = workingDirectory
+            };
+            var proc = new Process
+            {
+                StartInfo = psi
+            };
+
+            proc.Start();
+
+            proc.WaitForExit(timeout);
+
+            var output = proc.StandardOutput.ReadToEnd();
+            _logger.Debug(string.Format("RunProcessAndReadOutput output: [{0}]", string.Join("\n", output)));
+
+            var errorOutput = proc.StandardError.ReadToEnd();
+            _logger.Debug(string.Format("RunProcessAndReadOutput errorOutput: [{0}]",
+                string.Join("\n", errorOutput)));
+
+            return output + errorOutput;
+        }
+
 
         /// <inheritdoc />
         public string RunProcessWithBashAndReadOutput(string processName, string processArgs,

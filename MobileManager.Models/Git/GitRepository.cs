@@ -12,5 +12,7 @@ namespace MobileManager.Models.Git
         public string Remote { get; set; }
 
         public string DirectoryPath { get; set; }
+
+        public bool CleanRepository { get; set; }
     }
 }
