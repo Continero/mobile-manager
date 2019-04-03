@@ -121,7 +121,13 @@ namespace MobileManager.Controllers
                 return StatusCodeExtension(500, result);
             }
 
-            return _xcuiTestUtils.GetContentInValidFormat(xcuitest, outputFile);
+            return new ContentResult()
+            {
+                Content = System.IO.File.ReadAllText(outputFile),
+                ContentType = "text/plain",
+            };
+
+            //return _xcuiTestUtils.GetContentInValidFormat(xcuitest, outputFile);
         }
 
 
