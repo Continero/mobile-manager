@@ -215,10 +215,16 @@ namespace MobileManager.Utils
             var outputFile = Path.Combine(GitRepositoryPath, TestReports, xcuitest.Id.ToString()) +
                              "_CustomPreBuildScript.txt";
 
+            var workingDir = Path.Combine(GitRepositoryPath, xcuitest.Project);
+            if (xcuitest.Project != xcuitest.CustomPreBuildScript.WorkingDirectory)
+            {
+                workingDir = xcuitest.CustomPreBuildScript.WorkingDirectory;
+            }
+
             foreach (var scriptLine in xcuitest.CustomPreBuildScript.ScriptLine)
             {
                 _externalProcesses.RunScriptWithBashAndReadOutput(scriptLine,
-                    xcuitest.CustomPreBuildScript.WorkingDirectory, $"tee -a {outputFile}");
+                    workingDir, $"tee -a {outputFile}");
             }
         }
     }
