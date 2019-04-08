@@ -7,6 +7,7 @@ using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Castle.Core.Internal;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using MobileManager.Controllers.Interfaces;
 using MobileManager.Database.Repositories.Interfaces;
@@ -23,6 +24,8 @@ using Newtonsoft.Json;
 namespace MobileManager.Controllers
 {
     /// <inheritdoc />
+    [Route("api/v1/xcuitest")]
+    [EnableCors("AllowAllHeaders")]
     public class XcuitestController : ControllerExtensions, IXcuitestController
     {
         private readonly IManagerLogger _logger;
@@ -128,6 +131,7 @@ namespace MobileManager.Controllers
 
 
         /// <inheritdoc />
+        [HttpGet("resultArtifact", Name = "resultArtifact")]
         public IActionResult GetXcuitestResultArtifact(string id)
         {
             throw new System.NotImplementedException();
