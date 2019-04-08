@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Threading;
 using MobileManager.Logging.Logger;
 using ToolBox.Bridge;
 using ToolBox.Notification;
@@ -159,7 +160,7 @@ namespace MobileManager.Services
             {
                 FileName = "/bin/bash",
                 Arguments =
-                    $"-c \"{scriptLine}{(string.IsNullOrEmpty(pipe) ? string.Empty : " | " + pipe)}\"",
+                    $"-c \"{scriptLine}{(string.IsNullOrEmpty(pipe) ? string.Empty : " 2>&1 | " + pipe)}\"",
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
@@ -181,6 +182,7 @@ namespace MobileManager.Services
             _logger.Debug(string.Format("RunProcessAndReadOutput errorOutput: [{0}]",
                 string.Join("\n", errorOutput)));
 
+            Thread.Sleep(500);
             if (proc.ExitCode != 0)
             {
                 throw new Exception(errorOutput);
