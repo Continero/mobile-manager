@@ -124,7 +124,7 @@ namespace MobileManager.Services
             {
                 FileName = "/bin/bash",
                 Arguments =
-                    $"-c \"{processName} {processArgs}{(string.IsNullOrEmpty(pipe) ? string.Empty : " 2>&1 | " + pipe)}\"",
+                    $"-c \"{processName} {processArgs}{(string.IsNullOrEmpty(pipe) ? string.Empty : $" >> {pipe} 2>&1")}\"",
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,

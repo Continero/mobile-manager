@@ -188,7 +188,7 @@ namespace MobileManager.Utils
                 "xcodebuild",
                 $"{workspace} -scheme {xcuitest.Scheme} -sdk {xcuitest.Sdk} -destination \\\"{xcuitest.Destination}\\\" {onlyTesting} {xcuitest.Action}",
                 Path.Combine(GitRepositoryPath, xcuitest.Project),
-                $"tee {outputFile}");
+                $"{outputFile}");
 
             xcuitest.Results = result;
             _xcuitestRepository.Add(xcuitest);
