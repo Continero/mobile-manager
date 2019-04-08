@@ -76,7 +76,8 @@ namespace MobileManager.Services
         }
 
         /// <inheritdoc />
-        public string RunProcessAndReadOutput(string processName, string processArgs, string workingDirectory, int timeout = 5000)
+        public string RunProcessAndReadOutput(string processName, string processArgs, string workingDirectory,
+            int timeout = 5000)
         {
             _logger.Debug(string.Format("RunProcessAndReadOutput processName: [{0}] args: [{1}]", processName,
                 processArgs));
@@ -148,7 +149,8 @@ namespace MobileManager.Services
         }
 
         /// <inheritdoc />
-        public string RunScriptWithBashAndReadOutput(string scriptLine, string workingDirectory = "", string pipe = "", int timeout = 5000)
+        public string RunScriptWithBashAndReadOutput(string scriptLine, string workingDirectory = "", string pipe = "",
+            int timeout = 5000)
         {
             _logger.Debug(
                 $"{nameof(RunProcessWithBashAndReadOutput)} scriptLine [{scriptLine}], workingDir [{workingDirectory}], pipe [{pipe}]");
@@ -179,7 +181,7 @@ namespace MobileManager.Services
             _logger.Debug(string.Format("RunProcessAndReadOutput errorOutput: [{0}]",
                 string.Join("\n", errorOutput)));
 
-            if (!string.IsNullOrEmpty(errorOutput))
+            if (proc.ExitCode != 0)
             {
                 throw new Exception(errorOutput);
             }
