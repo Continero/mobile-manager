@@ -146,6 +146,12 @@ namespace MobileManager.Services
             _logger.Debug(string.Format("RunProcessAndReadOutput errorOutput: [{0}]",
                 string.Join("\n", errorOutput)));
 
+            Thread.Sleep(500);
+            if (proc.ExitCode != 0)
+            {
+                throw new Exception(errorOutput);
+            }
+
             return output + errorOutput;
         }
 
