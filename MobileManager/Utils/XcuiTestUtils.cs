@@ -184,14 +184,27 @@ namespace MobileManager.Utils
                 workspace = $"-workspace {xcuitest.Workspace}";
             }
 
-            result = _externalProcesses.RunProcessWithBashAndReadOutput(
-                "xcodebuild",
-                $"{workspace} -scheme {xcuitest.Scheme} -sdk {xcuitest.Sdk} -destination \\\"{xcuitest.Destination}\\\" {onlyTesting} {xcuitest.Action}",
-                Path.Combine(GitRepositoryPath, xcuitest.Project),
-                $"{outputFile}");
+            result = "";
+            try
+            {
+                result = _externalProcesses.RunProcessWithBashAndReadOutput(
+                    "xcodebuild",
+                    $"{workspace} -scheme {xcuitest.Scheme} -sdk {xcuitest.Sdk} -destination \\\"{xcuitest.Destination}\\\" {onlyTesting} {xcuitest.Action}",
+                    Path.Combine(GitRepositoryPath, xcuitest.Project),
+                    $"{outputFile}");
+            }
+            catch (Exception e)
+            {
+                _logger.Error($"{nameof(RunXcuiTest)} failed with error.", e);
+                result = File.ReadAllText(outputFile);
+                throw new Exception(result);
+            }
+            finally
+            {
+                xcuitest.Results = result;
+                _xcuitestRepository.Add(xcuitest);
+            }
 
-            xcuitest.Results = result;
-            _xcuitestRepository.Add(xcuitest);
             return outputFile;
         }
 
