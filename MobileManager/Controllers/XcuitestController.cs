@@ -110,9 +110,19 @@ namespace MobileManager.Controllers
                 CloneTestRepository(xcuitest.GitRepository);
             }
 
-            _xcuiTestUtils.RunCustomPreBuildScript(xcuitest);
+            var outputFile = "";
+            var result = "";
+            var outputFormat = "";
+            try
+            {
+                _xcuiTestUtils.RunCustomPreBuildScript(xcuitest);
 
-            var outputFile = _xcuiTestUtils.RunXcuiTest(xcuitest, out var outputFormat, out var result);
+                outputFile = _xcuiTestUtils.RunXcuiTest(xcuitest, out outputFormat, out result);
+            }
+            catch (Exception e)
+            {
+                return StatusCodeExtension(500, e.Message);
+            }
 
             if (!Directory.EnumerateFiles(Path.Combine(XcuiTestUtils.GitRepositoryPath, XcuiTestUtils.TestReports),
                 xcuitest.Id + ".*").Any())
