@@ -112,6 +112,9 @@ namespace MobileManager.Services
 
                                 _logger.Info(
                                     $"{nameof(LoadConnectedIosDevicesAsync)}: Device {deviceId} is already stored in database.");
+                                //update device properties
+                                SetNewDeviceProperties(deviceInDevicePool);
+                                await _restClient.UpdateDevice(deviceInDevicePool);
                                 await MountDeveloperDiskAsync(deviceInDevicePool);
                                 continue;
                             }
