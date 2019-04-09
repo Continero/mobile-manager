@@ -25,7 +25,8 @@ namespace MobileManager.Logging.Logger
                 .AddConsole()
                 .AddDebug();
 
-            loggerFactory.AddFile("Logs/log-{Date}.txt", LogLevel.Trace);
+            loggerFactory.AddFile("Logs/log-trace-{Date}.txt", LogLevel.Trace);
+            loggerFactory.AddFile("Logs/log-{Date}.txt");
             _logger = loggerFactory.CreateLogger("MobileManager");
         }
 
