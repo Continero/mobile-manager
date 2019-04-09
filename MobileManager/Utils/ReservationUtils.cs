@@ -67,6 +67,7 @@ namespace MobileManager.Utils
             {
                 ReservedDevices = reservedDevices,
                 Available = true,
+                DateCreated = reservation.DateCreated,
                 ReservationType = reservation.ReservationType
             };
 

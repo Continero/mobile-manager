@@ -31,7 +31,7 @@ namespace MobileManager.Models.Reservations
         public ReservationApplied(string id)
         {
             Id = id;
-            DateCreated = DateTime.Now;
+            DateApplied = DateTime.Now;
         }
 
         /// <inheritdoc />
@@ -47,6 +47,12 @@ namespace MobileManager.Models.Reservations
         /// </summary>
         /// <value>The date created.</value>
         public DateTime DateCreated { get; set; }
+
+        /// <summary>
+        /// Gets or sets the date applied.
+        /// </summary>
+        /// <value>The date created.</value>
+        public DateTime DateApplied { get; set; }
 
         /// <summary>
         /// Gets or sets the reserved devices.
