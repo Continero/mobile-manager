@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MobileManager.Configuration.Interfaces;
 using MobileManager.Controllers.Interfaces;
@@ -62,10 +63,9 @@ namespace MobileManager.Controllers
         /// </summary>
         /// <returns>Active devices.</returns>
         [HttpGet]
+        [ProducesResponseType(typeof(IEnumerable<Device>), StatusCodes.Status200OK)]
         public IEnumerable<Device> GetAll()
         {
-            LogRequestToDebug();
-
             var devices = _devicesRepository.GetAll();
             _logger.Debug(string.Format("GetAll devices: [{0}]", JsonConvert.SerializeObject(devices)));
             return devices;
@@ -77,13 +77,11 @@ namespace MobileManager.Controllers
         /// </summary>
         /// <returns>The device identifier.</returns>
         /// <param name="id">Identifier.</param>
-        /// <response code="200">Device returned successfully.</response>
-        /// <response code="404">Device not found.</response>
         [HttpGet("{id}", Name = "getDevice")]
+        [ProducesResponseType(typeof(Device), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
         public IActionResult GetById(string id)
         {
-            LogRequestToDebug();
-
             var device = _devicesRepository.Find(id);
             if (device == null)
             {
@@ -98,13 +96,11 @@ namespace MobileManager.Controllers
         /// </summary>
         /// <returns>The device properties.</returns>
         /// <param name="id">Identifier.</param>
-        /// <response code="200">Device returned successfully.</response>
-        /// <response code="404">Device not found.</response>
         [HttpGet("properties/{id}", Name = "getDeviceProperties")]
+        [ProducesResponseType(typeof(List<DeviceProperties>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
         public IActionResult GetPropertiesById(string id)
         {
-            LogRequestToDebug();
-
             var device = _devicesRepository.Find(id);
             if (device == null)
             {
@@ -120,10 +116,9 @@ namespace MobileManager.Controllers
         /// <returns>The device property keys.</returns>
         /// <response code="200">Property keys returned successfully.</response>
         [HttpGet("properties", Name = "getDevicePropertiesKeys")]
+        [ProducesResponseType(typeof(IEnumerable<string>), StatusCodes.Status200OK)]
         public IActionResult GetAllPropertiesKeys()
         {
-            LogRequestToDebug();
-
             var devices = _devicesRepository.GetAll();
             var properties = new List<DeviceProperties>();
 
@@ -142,13 +137,12 @@ namespace MobileManager.Controllers
         /// </summary>
         /// <returns>The device properties.</returns>
         /// <param name="id">Identifier.</param>
-        /// <response code="200">Device returned successfully.</response>
-        /// <response code="404">Device not found.</response>
         [HttpGet("seleniumConfig/{id}", Name = "getDeviceSeleniumConfig")]
+        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
         public IActionResult GetSeleniumConfigById(string id)
         {
-            LogRequestToDebug();
-
             var device = _devicesRepository.Find(id);
             if (device == null)
             {
@@ -162,9 +156,9 @@ namespace MobileManager.Controllers
                 case DeviceType.Android:
                     return JsonExtension(CreateAndroidSeleniumConfig(device));
                 case DeviceType.Unspecified:
-                    return JsonExtension("Unsupported device type");
+                    return BadRequestExtension("Unsupported device type");
                 default:
-                    return JsonExtension("Unsupported device type");
+                    return BadRequestExtension("Unsupported device type");
             }
         }
 
@@ -213,15 +207,13 @@ namespace MobileManager.Controllers
         /// </summary>
         /// <returns>Created device.</returns>
         /// <param name="device">Device.</param>
-        /// <response code="200">Device returned successfully.</response>
-        /// <response code="400">Invalid device in request</response>
-        /// <response code="409">Device already exists.</response>
-        /// <response code="500">Internal failure.</response>
         [HttpPost]
+        [ProducesResponseType(typeof(Device), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status409Conflict)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
         public IActionResult Create([FromBody] Device device)
         {
-            LogRequestToDebug();
-
             if (device == null)
             {
                 return BadRequestExtension("Empty device in request");
@@ -259,15 +251,13 @@ namespace MobileManager.Controllers
         /// <returns>The update.</returns>
         /// <param name="id">Identifier.</param>
         /// <param name="deviceUpdated">Device updated.</param>
-        /// <response code="200">Device returned successfully.</response>
-        /// <response code="400">Invalid device in request</response>
-        /// <response code="404">Device not found in database.</response>
-        /// <response code="500">Internal failure.</response>
         [HttpPut("{id}")]
+        [ProducesResponseType(typeof(Device), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status409Conflict)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
         public IActionResult Update(string id, [FromBody] Device deviceUpdated)
         {
-            LogRequestToDebug();
-
             if (deviceUpdated == null || deviceUpdated.Id != id)
             {
                 return BadRequestExtension("Empty device in request");
@@ -300,7 +290,7 @@ namespace MobileManager.Controllers
                 $"Updated device: [{JsonConvert.SerializeObject(device)}] to [{JsonConvert.SerializeObject(deviceUpdated)}]");
 
 
-            return CreatedAtRoute("getDevice", new {id = deviceUpdated.Id}, deviceUpdated);
+            return JsonExtension(deviceUpdated);
         }
 
         /// <inheritdoc />
@@ -309,15 +299,13 @@ namespace MobileManager.Controllers
         /// </summary>
         /// <returns>null</returns>
         /// <param name="id">Device Identifier.</param>
-        /// <response code="200">Device returned successfully.</response>
-        /// <response code="404">Device not found in database.</response>
-        /// <response code="423">Device is locked.</response>
-        /// <response code="500">Internal failure.</response>
         [HttpDelete("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status423Locked)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
         public IActionResult Delete(string id)
         {
-            LogRequestToDebug();
-
             var device = _devicesRepository.Find(id);
             if (device == null)
             {
@@ -338,7 +326,7 @@ namespace MobileManager.Controllers
                 return StatusCodeExtension(500, "Failed to Remove device from database. " + ex.Message);
             }
 
-            return OkExtension(string.Format("Successfully deleted device: [{0}]", device));
+            return OkExtension();
         }
 
         /// <summary>
@@ -347,10 +335,12 @@ namespace MobileManager.Controllers
         /// <returns>null</returns>
         /// <param name="id">device id</param>
         [HttpPost("{id}/restart")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status423Locked)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
         public IActionResult RestartDevice(string id)
         {
-            LogRequestToDebug();
-
             var device = _devicesRepository.Find(id);
             if (device == null)
             {
@@ -369,7 +359,7 @@ namespace MobileManager.Controllers
                 return StatusCodeExtension(500, $"Failed to restart device. [{restartOutput}]");
             }
 
-            return OkExtension("RestartDevice successful.");
+            return OkExtension();
         }
 
         /// <summary>
@@ -387,13 +377,13 @@ namespace MobileManager.Controllers
         /// </summary>
         /// <returns>The device screenshot.</returns>
         /// <param name="id">Identifier.</param>
-        /// <response code="200">Device returned successfully.</response>
-        /// <response code="404">Device not found.</response>
         [HttpGet("{id}/screenshot", Name = "getDeviceScreenshot")]
+        [ProducesResponseType(typeof(FileStreamResult), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
         public IActionResult GetDeviceScreenshotById(string id)
         {
-            LogRequestToDebug();
-
             var device = _devicesRepository.Find(id);
 
             if (device == null)
@@ -436,9 +426,9 @@ namespace MobileManager.Controllers
                     case DeviceType.Android:
                         return _screenshotService.TakeScreenshotAndroidDevice(device);
                     case DeviceType.Unspecified:
-                        return NotFoundExtension($"{device.Type} devices are not supported for screenshots.");
+                        return BadRequestExtension($"{device.Type} devices are not supported for screenshots.");
                     default:
-                        return NotFoundExtension($"{device.Type} devices are not supported for screenshots.");
+                        return BadRequestExtension($"{device.Type} devices are not supported for screenshots.");
                 }
             }
             catch (Exception e)

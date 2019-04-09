@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MobileManager.Controllers.Interfaces;
 using MobileManager.Database.Repositories.Interfaces;
@@ -58,10 +59,9 @@ namespace MobileManager.Controllers
         /// </summary>
         /// <returns>The all applied reservations.</returns>
         [HttpGet]
+        [ProducesResponseType(typeof(IEnumerable<ReservationApplied>), StatusCodes.Status200OK)]
         public IEnumerable<ReservationApplied> GetAllAppliedReservations()
         {
-            LogRequestToDebug();
-
             var reservations = _reservationsAppliedRepository.GetAll();
             _logger.Debug(
                 string.Format("GetAll reservations applied: [{0}]", JsonConvert.SerializeObject(reservations)));
@@ -75,10 +75,10 @@ namespace MobileManager.Controllers
         /// <returns>ReservationApplied.</returns>
         /// <param name="id">ReservationApplied Identifier.</param>
         [HttpGet("{id}", Name = "getAppliedReservation")]
+        [ProducesResponseType(typeof(ReservationApplied), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
         public IActionResult GetById(string id)
         {
-            LogRequestToDebug();
-
             var reservationFromApplied = _reservationsAppliedRepository.Find(id);
 
             if (reservationFromApplied == null)
@@ -95,14 +95,12 @@ namespace MobileManager.Controllers
         /// </summary>
         /// <returns>Created reservationApplied.</returns>
         /// <param name="reservation">ReservationApplied.</param>
-        /// <response code="200">ReservationApplied created successfully.</response>
-        /// <response code="400">Invalid reservationApplied in request</response>
-        /// <response code="500">Internal failure.</response>
         [HttpPost]
+        [ProducesResponseType(typeof(ReservationApplied), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
         public IActionResult Create([FromBody] ReservationApplied reservation)
         {
-            LogRequestToDebug();
-
             if (reservation == null)
             {
                 return BadRequestExtension("Reservation is empty.");
@@ -134,14 +132,13 @@ namespace MobileManager.Controllers
         /// </summary>
         /// <returns>null.</returns>
         /// <param name="id">ReservationApplied Identifier.</param>
-        /// <response code="200">ReservationApplied deleted successfully.</response>
-        /// <response code="400">Invalid id in request</response>
-        /// <response code="500">Internal failure.</response>
         [HttpDelete("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> DeleteAsync(string id)
         {
-            LogRequestToDebug();
-
             var reservationFromApplied = _reservationsAppliedRepository.Find(id);
 
             if (reservationFromApplied == null)
@@ -173,8 +170,7 @@ namespace MobileManager.Controllers
                 return StatusCodeExtension(500, "Failed to Remove reservation from database. " + ex.Message);
             }
 
-            return OkExtension(string.Format("Reservation queued successfully deleted: [{0}]",
-                JsonConvert.SerializeObject(reservationFromApplied)));
+            return OkExtension();
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MobileManager.Configuration;
 using MobileManager.Configuration.ConfigurationProvider;
@@ -32,10 +33,9 @@ namespace MobileManager.Controllers
         /// </summary>
         /// <returns>Internal configuration</returns>
         [HttpGet]
+        [ProducesResponseType(typeof(ManagerConfiguration), StatusCodes.Status200OK)]
         public IActionResult Get()
         {
-            LogRequestToDebug();
-
             return JsonExtension(AppConfigurationProvider.Get<ManagerConfiguration>());
         }
 
@@ -48,9 +48,9 @@ namespace MobileManager.Controllers
         /// <response code="200">Configuration returned successfully.</response>
         /// <response code="400">Empty request.</response>
         [HttpPut]
+        [ProducesResponseType(typeof(string), StatusCodes.Status501NotImplemented)]
         public IActionResult Update([FromBody] ManagerConfiguration configuration)
         {
-            LogRequestToDebug();
             return StatusCodeExtension(501, "This method is temporarily disabled.");
         }
     }

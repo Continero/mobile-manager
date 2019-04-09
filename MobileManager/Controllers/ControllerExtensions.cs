@@ -22,6 +22,7 @@ namespace MobileManager.Controllers
         public ControllerExtensions(IManagerLogger logger)
         {
             _logger = logger;
+            LogRequestToDebug();
         }
 
         /// <summary>

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MobileManager.Controllers.Interfaces;
 using MobileManager.Database.Repositories.Interfaces;
@@ -55,10 +56,9 @@ namespace MobileManager.Controllers
         /// </summary>
         /// <returns>Reservations.</returns>
         [HttpGet]
+        [ProducesResponseType(typeof(IEnumerable<Reservation>), StatusCodes.Status200OK)]
         public IEnumerable<Reservation> GetAll()
         {
-            LogRequestToDebug();
-
             var reservations = _reservationsQueueRepository.GetAll();
             _logger.Debug(string.Format("GetAll reservations queued: [{0}]",
                 JsonConvert.SerializeObject(reservations)));
@@ -72,10 +72,10 @@ namespace MobileManager.Controllers
         /// <returns>The reservation identifier.</returns>
         /// <param name="id">Reservation.</param>
         [HttpGet("{id}", Name = "getQueueReservation")]
+        [ProducesResponseType(typeof(Reservation), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
         public IActionResult GetById(string id)
         {
-            LogRequestToDebug();
-
             var reservationFromQueue = _reservationsQueueRepository.Find(id);
 
             if (reservationFromQueue == null)
@@ -92,14 +92,12 @@ namespace MobileManager.Controllers
         /// </summary>
         /// <returns>The reservation.</returns>
         /// <param name="reservation">Reservation.</param>
-        /// <response code="200">Reservation created successfully.</response>
-        /// <response code="400">Invalid reservation in request</response>
-        /// <response code="500">Internal failure.</response>
         [HttpPost]
+        [ProducesResponseType(typeof(Reservation), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> CreateAsync([FromBody] Reservation reservation)
         {
-            LogRequestToDebug();
-
             if (reservation == null)
             {
                 return BadRequestExtension("Reservation is empty.");
@@ -137,7 +135,7 @@ namespace MobileManager.Controllers
             _logger.Debug(string.Format("Created new queued reservation: [{0}]",
                 JsonConvert.SerializeObject(reservation)));
 
-            return CreatedAtRoute("getQueueReservation", new {id = reservation.Id}, reservation);
+            return CreatedAtRoute("getQueueRzeservation", new {id = reservation.Id}, reservation);
         }
 
         private bool ValidateRequestedDevices(Reservation reservation, out IActionResult actionResult)
@@ -180,15 +178,19 @@ namespace MobileManager.Controllers
         /// </summary>
         /// <returns>null.</returns>
         /// <param name="id">Reservation Identifier.</param>
-        /// <response code="200">Reservation deleted successfully.</response>
-        /// <response code="404">Reservation by id not found</response>
-        /// <response code="500">Internal failure.</response>
         [HttpDelete("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
         public IActionResult Delete(string id)
         {
-            LogRequestToDebug();
-
             var reservationFromQueue = _reservationsQueueRepository.Find(id);
+
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                return BadRequestExtension("Empty id.");
+            }
 
             if (reservationFromQueue == null)
             {
@@ -204,8 +206,7 @@ namespace MobileManager.Controllers
                 return StatusCodeExtension(500, "Failed to Remove reservation from database. " + ex.Message);
             }
 
-            return OkExtension(String.Format("Reservation applied successfully deleted: [{0}]",
-                JsonConvert.SerializeObject(reservationFromQueue)));
+            return OkExtension();
         }
 
 
@@ -215,15 +216,13 @@ namespace MobileManager.Controllers
         /// <returns>The update.</returns>
         /// <param name="id">Identifier.</param>
         /// <param name="reservationUpdated">Device updated.</param>
-        /// <response code="200">Device returned successfully.</response>
-        /// <response code="400">Invalid device in request</response>
-        /// <response code="404">Device not found in database.</response>
-        /// <response code="500">Internal failure.</response>
         [HttpPut("{id}")]
+        [ProducesResponseType(typeof(Reservation), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
         public IActionResult Update(string id, [FromBody] Reservation reservationUpdated)
         {
-            LogRequestToDebug();
-
             if (reservationUpdated == null || reservationUpdated.Id != id)
             {
                 return BadRequestExtension("Empty reservation in request");
@@ -248,7 +247,7 @@ namespace MobileManager.Controllers
                 JsonConvert.SerializeObject(reservationUpdated)));
 
 
-            return CreatedAtRoute("getQueueReservation", new {id = reservationUpdated.Id}, reservationUpdated);
+            return JsonExtension(reservationUpdated);
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MobileManager.Appium;
 using MobileManager.Appium.Interfaces;
@@ -45,15 +46,13 @@ namespace MobileManager.Controllers
         /// </summary>
         /// <returns>Created new appium process.</returns>
         /// <param name="appiumProcess">Appium process.</param>
-        /// <response code="200">AppiumProcess added.</response>
-        /// <response code="400">Empty AppiumProcess in request.</response>
-        /// <response code="409">AppiumProcess DeviceId already stored in database.</response>
-        /// <response code="500">Failed to Add AppiumProcess in database.</response>
         [HttpPost]
+        [ProducesResponseType(typeof(AppiumProcess), StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public IActionResult Create([FromBody] AppiumProcess appiumProcess)
         {
-            LogRequestToDebug();
-
             if (!ValidateAppiumProcess(appiumProcess, out var badRequest))
             {
                 return badRequest;
@@ -88,14 +87,12 @@ namespace MobileManager.Controllers
         /// </summary>
         /// <returns>null</returns>
         /// <param name="id">Identifier of appium process.</param>
-        /// <response code="200">AppiumProcess deleted.</response>
-        /// <response code="400">Empty id in request.</response>
-        /// <response code="500">Failed to delete AppiumProcess from database.</response>
         [HttpDelete("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public IActionResult Delete(string id)
         {
-            LogRequestToDebug();
-
             if (string.IsNullOrEmpty(id))
             {
                 return BadRequestExtension($"Empty request.");
@@ -128,10 +125,10 @@ namespace MobileManager.Controllers
         /// <returns>Active appium processes.</returns>
         /// <response code="200">AppiumProcesses returned successfully.</response>
         [HttpGet]
+        [ProducesResponseType(typeof(IEnumerable<AppiumProcess>), StatusCodes.Status200OK)]
+
         public IEnumerable<AppiumProcess> GetAll()
         {
-            LogRequestToDebug();
-
             return _appiumRepository.GetAll();
         }
 
@@ -144,10 +141,11 @@ namespace MobileManager.Controllers
         /// <response code="200">AppiumProcess returned successfully.</response>
         /// <response code="400">Empty id in request.</response>
         [HttpGet("{id}", Name = "getAppiumProcess")]
+        [ProducesResponseType(typeof(AppiumProcess), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
         public IActionResult GetById(string id)
         {
-            LogRequestToDebug();
-
             if (string.IsNullOrEmpty(id))
             {
                 return BadRequestExtension($"Empty request.");

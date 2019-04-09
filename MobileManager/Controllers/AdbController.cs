@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MobileManager.Controllers.Interfaces;
 using MobileManager.Http.Clients.Interfaces;
@@ -46,9 +47,9 @@ namespace MobileManager.Controllers
         /// </remarks>
         /// <returns>Result of ADB command</returns>
         /// <param name="adbCommand">ADB command without "adb" executable in the name</param>
-        /// <response code="200">Command executed successfully.</response>
-        /// <response code="500">Failed to run adb command.</response>
         [HttpPost("command")]
+        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
         public IActionResult Command([FromBody] AdbCommand adbCommand)
         {
             if (!IsAdbCommandExecutable(adbCommand, out var actionResult)) return actionResult;
@@ -77,9 +78,9 @@ namespace MobileManager.Controllers
         /// </remarks>
         /// <returns>Result of ADB command</returns>
         /// <param name="adbCommand">ADB shell command without "adb shell" executable in the name</param>
-        /// <response code="200">Command executed successfully.</response>
-        /// <response code="500">Failed to run adb command.</response>
         [HttpPost("shellCommand")]
+        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
         public IActionResult ShellAdbCommand([FromBody] AdbCommand adbCommand)
         {
             if (!IsAdbCommandExecutable(adbCommand, out var actionResult)) return actionResult;
@@ -102,8 +103,6 @@ namespace MobileManager.Controllers
         private bool IsAdbCommandExecutable(IAdbCommand adbCommand, out IActionResult actionResult)
         {
             actionResult = null;
-
-            LogRequestToDebug();
 
             if (adbCommand?.AndroidDeviceId == null || adbCommand.Command == null)
             {

@@ -1,5 +1,7 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MobileManager.Controllers.Interfaces;
 using MobileManager.Database.Repositories.Interfaces;
@@ -37,13 +39,10 @@ namespace MobileManager.Controllers
         /// <returns>MM log.</returns>
         /// <param name="numberOfLines">Specify number of last lines to display</param>
         /// <param name="filter">string filter for fulltext search</param>
-        /// <response code="200">MM log returned successfully.</response>
-        /// <response code="404">MM log or device id not found.</response>
         [HttpGet("filter", Name = "getMMLog")]
+        [ProducesResponseType(typeof(IEnumerable<LogMessage>),StatusCodes.Status200OK)]
         public IActionResult GetLines(int numberOfLines, string filter = "")
         {
-            LogRequestToDebug();
-
             var logMessages = _repository.GetAll().Where(l => l.Message.Contains(filter)).Take(numberOfLines);
 
             return JsonExtension(logMessages);

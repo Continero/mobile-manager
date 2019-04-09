@@ -2,6 +2,7 @@
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MobileManager.Controllers.Interfaces;
 using MobileManager.Http.Clients.Interfaces;
@@ -39,13 +40,12 @@ namespace MobileManager.Controllers
         /// </summary>
         /// <returns>ActionResult</returns>
         /// <param name="id">Device Identifier.</param>
-        /// <response code="200">Appium log deleted successfully.</response>
-        /// <response code="404">Appium log or device id not found.</response>
         [HttpDelete("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Delete(string id)
         {
-            LogRequestToDebug();
-
             var device = await _restClient.GetDevice(id);
             if (device == null)
             {
@@ -79,13 +79,11 @@ namespace MobileManager.Controllers
         /// </summary>
         /// <returns>Appium log.</returns>
         /// <param name="id">Device Identifier.</param>
-        /// <response code="200">Appium log returned successfully.</response>
-        /// <response code="404">Appium log or device id not found.</response>
         [HttpGet("{id}", Name = "getAppiumLog")]
+        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetById(string id)
         {
-            LogRequestToDebug();
-
             var device = await _restClient.GetDevice(id);
             if (device == null)
             {

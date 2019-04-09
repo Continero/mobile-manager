@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Castle.Core.Internal;
 using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MobileManager.Controllers.Interfaces;
 using MobileManager.Database.Repositories.Interfaces;
@@ -54,6 +55,7 @@ namespace MobileManager.Controllers
 
         /// <inheritdoc />
         [HttpGet("availableDevices", Name = "getAvailableDevices")]
+        [ProducesResponseType(typeof(IEnumerable<InstrumentsDevice>), StatusCodes.Status200OK)]
         public IEnumerable<InstrumentsDevice> GetAvailableDevices()
         {
             var instrumentsDevices = _xcuiTestUtils.GetInstrumentsDevices();
@@ -65,6 +67,7 @@ namespace MobileManager.Controllers
 
         /// <inheritdoc />
         [HttpGet("availableRepositories", Name = "getAvailableRepositories")]
+        [ProducesResponseType(typeof(IEnumerable<IGitRepository>), StatusCodes.Status200OK)]
         public IEnumerable<IGitRepository> GetAvailableRepositories()
         {
             var directories = Directory.GetDirectories(XcuiTestUtils.GitRepositoryPath);
@@ -74,6 +77,7 @@ namespace MobileManager.Controllers
 
         /// <inheritdoc />
         [HttpPost("cloneTestRepository", Name = "cloneTestRepository")]
+        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
         public IActionResult CloneTestRepository([FromBody] GitRepository gitRepository)
         {
             var gitPath = Path.Combine(XcuiTestUtils.GitRepositoryPath, gitRepository.Name);
@@ -85,6 +89,9 @@ namespace MobileManager.Controllers
 
         /// <inheritdoc />
         [HttpPost("runXcuitest", Name = "RunXcuitest")]
+        [ProducesResponseType(typeof(ContentResult), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> RunXcuitest([FromBody] Xcuitest xcuitest)
         {
             if (string.IsNullOrEmpty(xcuitest.ReservationId))
@@ -146,6 +153,7 @@ namespace MobileManager.Controllers
 
         /// <inheritdoc />
         [HttpGet("resultArtifact", Name = "resultArtifact")]
+        [ProducesResponseType(StatusCodes.Status501NotImplemented)]
         public IActionResult GetXcuitestResultArtifact(string id)
         {
             throw new System.NotImplementedException();

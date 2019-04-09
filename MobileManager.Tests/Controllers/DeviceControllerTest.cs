@@ -299,7 +299,7 @@ namespace MobileManagerTests.Controllers
             var result = controller.Update(_device1.Id, device);
 
             // Assert
-            var viewResult = Assert.IsType<CreatedAtRouteResult>(result);
+            var viewResult = Assert.IsType<JsonResult>(result);
             Assert.Equal(device, viewResult.Value);
         }
 
@@ -657,7 +657,7 @@ namespace MobileManagerTests.Controllers
             var result = controller.GetSeleniumConfigById(device.Id);
 
             // Assert
-            var viewResult = Assert.IsType<JsonResult>(result);
+            var viewResult = Assert.IsType<BadRequestObjectResult>(result);
             Assert.Equal("Unsupported device type", viewResult.Value);
         }
 
@@ -681,7 +681,7 @@ namespace MobileManagerTests.Controllers
             var result = controller.GetSeleniumConfigById(device.Id);
 
             // Assert
-            var viewResult = Assert.IsType<JsonResult>(result);
+            var viewResult = Assert.IsType<BadRequestObjectResult>(result);
             Assert.Equal("Unsupported device type", viewResult.Value);
         }
 
@@ -1084,7 +1084,7 @@ namespace MobileManagerTests.Controllers
             var result = controller.GetDeviceScreenshotById(device.Id);
 
             // Assert
-            Assert.IsType<NotFoundObjectResult>(result);
+            Assert.IsType<BadRequestObjectResult>(result);
             Assert.DoesNotContain(device.Id, controller.ScreenshotLocked);
         }
 
@@ -1117,7 +1117,7 @@ namespace MobileManagerTests.Controllers
             var result = controller.GetDeviceScreenshotById(device.Id);
 
             // Assert
-            Assert.IsType<NotFoundObjectResult>(result);
+            Assert.IsType<BadRequestObjectResult>(result);
             Assert.DoesNotContain(device.Id, controller.ScreenshotLocked);
         }
     }
