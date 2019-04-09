@@ -135,7 +135,7 @@ namespace MobileManager.Controllers
             _logger.Debug(string.Format("Created new queued reservation: [{0}]",
                 JsonConvert.SerializeObject(reservation)));
 
-            return CreatedAtRoute("getQueueRzeservation", new {id = reservation.Id}, reservation);
+            return CreatedAtRoute("getQueueReservation", new {id = reservation.Id}, reservation);
         }
 
         private bool ValidateRequestedDevices(Reservation reservation, out IActionResult actionResult)

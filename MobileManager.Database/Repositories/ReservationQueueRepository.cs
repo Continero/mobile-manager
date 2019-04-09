@@ -51,7 +51,7 @@ namespace MobileManager.Database.Repositories
         /// <param name="id">Identifier.</param>
         public Reservation Find(string id)
         {
-            var reservationQueued = _context.Reservations.Include(r => r.RequestedDevices)
+            var reservationQueued = _context.Reservations.Include(r => r.RequestedDevices).ThenInclude(r => r.Properties)
                 .FirstOrDefault(r => r.Id == id);
 
             return reservationQueued;
