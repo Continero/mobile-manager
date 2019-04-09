@@ -62,11 +62,9 @@ namespace MobileManager.Utils
         {
             _logger.Debug(
                 $"Applying reservation - all devices are locked: {JsonConvert.SerializeObject(reservedDevices)}");
-            reservation.Available = true;
             var reservationToBeApplied = new ReservationApplied(reservation.Id)
             {
                 ReservedDevices = reservedDevices,
-                Available = true,
                 DateCreated = reservation.DateCreated,
                 ReservationType = reservation.ReservationType
             };
@@ -95,7 +93,7 @@ namespace MobileManager.Utils
 
                 _logger.Debug($"Applying reservation - device is found: {JsonConvert.SerializeObject(device)}");
 
-                if (!reservation.Available && await IsDeviceAvailable(device))
+                if (await IsDeviceAvailable(device))
                 {
                     _logger.Debug($"Applying reservation - locking device: {JsonConvert.SerializeObject(device)}");
 

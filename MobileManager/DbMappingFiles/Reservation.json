@@ -22,14 +22,6 @@
             }
         },
         {
-            "PropertyName": "Available",
-            "Mappings": {
-                "MsSql": "Available",
-                "Sqlite": "Available",
-                "PostgreSql": "available"
-            }
-        },
-        {
             "PropertyName": "FailedToApply",
             "Mappings": {
                 "MsSql": "FailedToApply",

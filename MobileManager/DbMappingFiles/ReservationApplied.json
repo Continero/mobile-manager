@@ -22,11 +22,11 @@
             }
         },
         {
-            "PropertyName": "Available",
+            "PropertyName": "DateApplied",
             "Mappings": {
-                "MsSql": "Available",
-                "Sqlite": "Available",
-                "PostgreSql": "available"
+                "MsSql": "DateApplied",
+                "Sqlite": "DateApplied",
+                "PostgreSql": "date_applied"
             }
         },
         {

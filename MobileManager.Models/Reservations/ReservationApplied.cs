@@ -65,13 +65,6 @@ namespace MobileManager.Models.Reservations
 
         /// <inheritdoc />
         /// <summary>
-        /// Gets or sets a value indicating whether this <see cref="T:MobileManager.Models.Reservations.ReservationApplied" /> is available.
-        /// </summary>
-        /// <value><c>true</c> if available; otherwise, <c>false</c>.</value>
-        public bool Available { get; set; }
-
-        /// <inheritdoc />
-        /// <summary>
         /// Gets or sets the failed to apply counter.
         /// </summary>
         /// <value>The failed to apply.</value>
