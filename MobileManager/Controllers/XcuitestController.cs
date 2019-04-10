@@ -129,13 +129,20 @@ namespace MobileManager.Controllers
                 try
                 {
                     _xcuiTestUtils.RunCustomPreBuildScript(xcuitest);
-
-                    outputFile = _xcuiTestUtils.RunXcuiTest(xcuitest, out result);
                 }
                 catch (Exception e)
                 {
                     return StatusCodeExtension(500, e.Message);
                 }
+            }
+
+            try
+            {
+                outputFile = _xcuiTestUtils.RunXcuiTest(xcuitest, out result);
+            }
+            catch (Exception e)
+            {
+                return StatusCodeExtension(500, e.Message);
             }
 
             if (!Directory.EnumerateFiles(Path.Combine(XcuiTestUtils.GitRepositoryPath, XcuiTestUtils.TestReports),
