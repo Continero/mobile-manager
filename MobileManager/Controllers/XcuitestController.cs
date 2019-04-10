@@ -101,7 +101,7 @@ namespace MobileManager.Controllers
 
         /// <inheritdoc />
         [HttpPost("runXcuitest", Name = "RunXcuitest")]
-        [ProducesResponseType(typeof(ContentResult), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> RunXcuitest([FromBody] Xcuitest xcuitest)
@@ -160,11 +160,13 @@ namespace MobileManager.Controllers
                 return StatusCodeExtension(500, result);
             }
 
-            return new ContentResult()
-            {
-                Content = System.IO.File.ReadAllText(outputFile),
-                ContentType = "text/plain",
-            };
+//            return new ContentResult()
+//            {
+//                Content = System.IO.File.ReadAllText(outputFile),
+//                ContentType = "text/plain",
+//            };
+
+            return OkExtension(System.IO.File.ReadAllText(outputFile));
 
             //return _xcuiTestUtils.GetContentInValidFormat(xcuitest, outputFile);
         }
