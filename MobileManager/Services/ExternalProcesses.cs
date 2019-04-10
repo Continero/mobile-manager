@@ -160,7 +160,7 @@ namespace MobileManager.Services
             int timeout = 5000)
         {
             _logger.Debug(
-                $"{nameof(RunProcessWithBashAndReadOutput)} scriptLine [{scriptLine}], workingDir [{workingDirectory}], pipe [{pipe}]");
+                $"{nameof(RunScriptWithBashAndReadOutput)} scriptLine [{scriptLine}], workingDir [{workingDirectory}], pipe [{pipe}]");
 
             var psi = new ProcessStartInfo()
             {

@@ -124,7 +124,7 @@ namespace MobileManager.Controllers
             var outputFile = "";
             var result = "";
 
-            if (xcuitest.CustomPreBuildScript.ScriptLine.Any())
+            if (xcuitest.CustomPreBuildScript != null && xcuitest.CustomPreBuildScript.ScriptLine.Any())
             {
                 try
                 {
