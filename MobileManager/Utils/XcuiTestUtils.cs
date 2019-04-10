@@ -194,7 +194,7 @@ namespace MobileManager.Utils
             var destination = "";
             foreach (var reservedDevice in reservation.ReservedDevices)
             {
-                destination += $"-destination \\\"id={reservedDevice.Id}\\\" ";
+                destination += $"-destination \\\"id={reservedDevice.DeviceId}\\\" ";
             }
 
             result = "";
