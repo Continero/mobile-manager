@@ -219,7 +219,7 @@ namespace MobileManager.Utils
                     "xcodebuild",
                     $"{workspace} -scheme {xcuitest.Scheme} -sdk {xcuitest.Sdk} {destination} {onlyTesting} {xcuitest.Action}",
                     Path.Combine(GitRepositoryPath, xcuitest.Project),
-                    $"{outputFile}");
+                    $"{outputFile}",1800000);
             }
             catch (Exception e)
             {
@@ -275,7 +275,7 @@ namespace MobileManager.Utils
             foreach (var scriptLine in xcuitest.CustomPreBuildScript.ScriptLine)
             {
                 var output = _externalProcesses.RunScriptWithBashAndReadOutput(scriptLine,
-                    workingDir, $"tee -a {outputFile}");
+                    workingDir, $"tee -a {outputFile}", 1800000);
 
                 _logger.Debug($"{nameof(RunCustomPreBuildScript)}: [{output}]");
             }
