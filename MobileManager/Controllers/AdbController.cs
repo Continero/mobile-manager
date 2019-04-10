@@ -52,6 +52,7 @@ namespace MobileManager.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
         public IActionResult Command([FromBody] AdbCommand adbCommand)
         {
+            LogRequest();
             if (!IsAdbCommandExecutable(adbCommand, out var actionResult)) return actionResult;
 
             string output;
@@ -83,6 +84,7 @@ namespace MobileManager.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
         public IActionResult ShellAdbCommand([FromBody] AdbCommand adbCommand)
         {
+            LogRequest();
             if (!IsAdbCommandExecutable(adbCommand, out var actionResult)) return actionResult;
 
             string output;

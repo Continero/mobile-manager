@@ -58,6 +58,7 @@ namespace MobileManager.Controllers
         [ProducesResponseType(typeof(IEnumerable<InstrumentsDevice>), StatusCodes.Status200OK)]
         public IEnumerable<InstrumentsDevice> GetAvailableDevices()
         {
+            LogRequest();
             var instrumentsDevices = _xcuiTestUtils.GetInstrumentsDevices();
 
             _logger.Debug($"{nameof(GetAvailableDevices)}: {JsonConvert.SerializeObject(instrumentsDevices)}");
@@ -70,6 +71,7 @@ namespace MobileManager.Controllers
         [ProducesResponseType(typeof(IEnumerable<IGitRepository>), StatusCodes.Status200OK)]
         public IEnumerable<IGitRepository> GetAvailableRepositories()
         {
+            LogRequest();
             var directories = Directory.GetDirectories(XcuiTestUtils.GitRepositoryPath);
 
             return directories.Select(directory => new GitRepository {Name = directory}).ToList();
@@ -80,6 +82,7 @@ namespace MobileManager.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
         public IActionResult CloneTestRepository([FromBody] GitRepository gitRepository)
         {
+            LogRequest();
             var gitPath = Path.Combine(XcuiTestUtils.GitRepositoryPath, gitRepository.Name);
 
             var result = _xcuiTestUtils.CloneOrPullGitRepository(gitRepository, gitPath);
@@ -94,6 +97,7 @@ namespace MobileManager.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> RunXcuitest([FromBody] Xcuitest xcuitest)
         {
+            LogRequest();
             if (string.IsNullOrEmpty(xcuitest.ReservationId))
             {
                 return BadRequestExtension("ReservationId is empty. Can only run XcuiTests on reserved devices.");
@@ -155,6 +159,7 @@ namespace MobileManager.Controllers
         [ProducesResponseType(StatusCodes.Status501NotImplemented)]
         public IActionResult GetXcuitestResultArtifact(string id)
         {
+            LogRequest();
             throw new System.NotImplementedException();
         }
     }

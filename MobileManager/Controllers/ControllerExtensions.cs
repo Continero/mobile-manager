@@ -22,7 +22,6 @@ namespace MobileManager.Controllers
         public ControllerExtensions(IManagerLogger logger)
         {
             _logger = logger;
-            LogRequestToDebug();
         }
 
         /// <summary>
@@ -104,9 +103,9 @@ namespace MobileManager.Controllers
         /// Log incoming request data to debug.
         /// </summary>
         [NonAction]
-        public void LogRequestToDebug()
+        public void LogRequest()
         {
-            _logger.Debug($"{GetDetails(Request)}");
+            _logger.Info($"{GetDetails(Request)}");
         }
 
         private static string GetDetails(HttpRequest request)

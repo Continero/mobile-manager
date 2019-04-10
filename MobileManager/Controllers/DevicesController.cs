@@ -66,6 +66,7 @@ namespace MobileManager.Controllers
         [ProducesResponseType(typeof(IEnumerable<Device>), StatusCodes.Status200OK)]
         public IEnumerable<Device> GetAll()
         {
+            LogRequest();
             var devices = _devicesRepository.GetAll();
             _logger.Debug(string.Format("GetAll devices: [{0}]", JsonConvert.SerializeObject(devices)));
             return devices;
@@ -82,6 +83,7 @@ namespace MobileManager.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
         public IActionResult GetById(string id)
         {
+            LogRequest();
             var device = _devicesRepository.Find(id);
             if (device == null)
             {
@@ -101,6 +103,7 @@ namespace MobileManager.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
         public IActionResult GetPropertiesById(string id)
         {
+            LogRequest();
             var device = _devicesRepository.Find(id);
             if (device == null)
             {
@@ -119,6 +122,7 @@ namespace MobileManager.Controllers
         [ProducesResponseType(typeof(IEnumerable<string>), StatusCodes.Status200OK)]
         public IActionResult GetAllPropertiesKeys()
         {
+            LogRequest();
             var devices = _devicesRepository.GetAll();
             var properties = new List<DeviceProperties>();
 
@@ -143,6 +147,7 @@ namespace MobileManager.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
         public IActionResult GetSeleniumConfigById(string id)
         {
+            LogRequest();
             var device = _devicesRepository.Find(id);
             if (device == null)
             {
@@ -214,6 +219,7 @@ namespace MobileManager.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
         public IActionResult Create([FromBody] Device device)
         {
+            LogRequest();
             if (device == null)
             {
                 return BadRequestExtension("Empty device in request");
@@ -258,6 +264,7 @@ namespace MobileManager.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
         public IActionResult Update(string id, [FromBody] Device deviceUpdated)
         {
+            LogRequest();
             if (deviceUpdated == null || deviceUpdated.Id != id)
             {
                 return BadRequestExtension("Empty device in request");
@@ -306,6 +313,7 @@ namespace MobileManager.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
         public IActionResult Delete(string id)
         {
+            LogRequest();
             var device = _devicesRepository.Find(id);
             if (device == null)
             {
@@ -341,6 +349,7 @@ namespace MobileManager.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
         public IActionResult RestartDevice(string id)
         {
+            LogRequest();
             var device = _devicesRepository.Find(id);
             if (device == null)
             {
@@ -384,6 +393,7 @@ namespace MobileManager.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
         public IActionResult GetDeviceScreenshotById(string id)
         {
+            LogRequest();
             var device = _devicesRepository.Find(id);
 
             if (device == null)

@@ -67,6 +67,7 @@ namespace MobileManager.Controllers
         [ProducesResponseType(typeof(AllRepositoriesData), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAllRepositoriesAsync()
         {
+            LogRequest();
             var resultDevices = await _restClient.GetDevices();
             var resultReservationQueue = await _restClient.GetReservations();
             var resultReservationApplied = await _restClient.GetAppliedReservations();

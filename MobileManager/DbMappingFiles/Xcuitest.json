@@ -38,14 +38,6 @@
             }
         },
         {
-            "PropertyName": "Destination",
-            "Mappings": {
-                "MsSql": "Destination",
-                "Sqlite": "Destination",
-                "PostgreSql": "destination"
-            }
-        },
-        {
             "PropertyName": "Action",
             "Mappings": {
                 "MsSql": "Action",

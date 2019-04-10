@@ -53,6 +53,7 @@ namespace MobileManager.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public IActionResult Create([FromBody] AppiumProcess appiumProcess)
         {
+            LogRequest();
             if (!ValidateAppiumProcess(appiumProcess, out var badRequest))
             {
                 return badRequest;
@@ -93,6 +94,7 @@ namespace MobileManager.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public IActionResult Delete(string id)
         {
+            LogRequest();
             if (string.IsNullOrEmpty(id))
             {
                 return BadRequestExtension($"Empty request.");
@@ -129,6 +131,7 @@ namespace MobileManager.Controllers
 
         public IEnumerable<AppiumProcess> GetAll()
         {
+            LogRequest();
             return _appiumRepository.GetAll();
         }
 
@@ -146,6 +149,7 @@ namespace MobileManager.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
         public IActionResult GetById(string id)
         {
+            LogRequest();
             if (string.IsNullOrEmpty(id))
             {
                 return BadRequestExtension($"Empty request.");

@@ -43,6 +43,7 @@ namespace MobileManager.Controllers
         [ProducesResponseType(typeof(IEnumerable<LogMessage>),StatusCodes.Status200OK)]
         public IActionResult GetLines(int numberOfLines, string filter = "")
         {
+            LogRequest();
             var logMessages = _repository.GetAll().Where(l => l.Message.Contains(filter)).Take(numberOfLines);
 
             return JsonExtension(logMessages);

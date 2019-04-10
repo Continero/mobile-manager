@@ -46,6 +46,7 @@ namespace MobileManager.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Delete(string id)
         {
+            LogRequest();
             var device = await _restClient.GetDevice(id);
             if (device == null)
             {
@@ -84,6 +85,7 @@ namespace MobileManager.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetById(string id)
         {
+            LogRequest();
             var device = await _restClient.GetDevice(id);
             if (device == null)
             {

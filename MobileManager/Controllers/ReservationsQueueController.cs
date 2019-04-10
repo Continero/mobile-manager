@@ -59,6 +59,7 @@ namespace MobileManager.Controllers
         [ProducesResponseType(typeof(IEnumerable<Reservation>), StatusCodes.Status200OK)]
         public IEnumerable<Reservation> GetAll()
         {
+            LogRequest();
             var reservations = _reservationsQueueRepository.GetAll();
             _logger.Debug(string.Format("GetAll reservations queued: [{0}]",
                 JsonConvert.SerializeObject(reservations)));
@@ -76,6 +77,7 @@ namespace MobileManager.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
         public IActionResult GetById(string id)
         {
+            LogRequest();
             var reservationFromQueue = _reservationsQueueRepository.Find(id);
 
             if (reservationFromQueue == null)
@@ -98,6 +100,7 @@ namespace MobileManager.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> CreateAsync([FromBody] Reservation reservation)
         {
+            LogRequest();
             if (reservation == null)
             {
                 return BadRequestExtension("Reservation is empty.");
@@ -185,6 +188,7 @@ namespace MobileManager.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
         public IActionResult Delete(string id)
         {
+            LogRequest();
             var reservationFromQueue = _reservationsQueueRepository.Find(id);
 
             if (string.IsNullOrWhiteSpace(id))
@@ -223,6 +227,7 @@ namespace MobileManager.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
         public IActionResult Update(string id, [FromBody] Reservation reservationUpdated)
         {
+            LogRequest();
             if (reservationUpdated == null || reservationUpdated.Id != id)
             {
                 return BadRequestExtension("Empty reservation in request");

@@ -36,6 +36,7 @@ namespace MobileManager.Controllers
         [ProducesResponseType(typeof(ManagerConfiguration), StatusCodes.Status200OK)]
         public IActionResult Get()
         {
+            LogRequest();
             return JsonExtension(AppConfigurationProvider.Get<ManagerConfiguration>());
         }
 
@@ -51,6 +52,7 @@ namespace MobileManager.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status501NotImplemented)]
         public IActionResult Update([FromBody] ManagerConfiguration configuration)
         {
+            LogRequest();
             return StatusCodeExtension(501, "This method is temporarily disabled.");
         }
     }
