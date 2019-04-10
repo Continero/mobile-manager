@@ -83,7 +83,7 @@ namespace MobileManager
 
             JsonConvert.DefaultSettings = () => new JsonSerializerSettings
             {
-                Formatting = Formatting.Indented,
+                //Formatting = Formatting.Indented,
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
             };
 
@@ -164,22 +164,8 @@ namespace MobileManager
 
             applicationLifetime.ApplicationStopped.Register(OnShutdown);
 
-            loggerFactory.AddConsole((logText, logLevel) =>
-            {
-                if (Debugger.IsAttached)
-                {
-                    return true;
-                }
-
-                if (logLevel >= appconfig.DefaultLogLevel)
-                {
-                    return true;
-                }
-
-                return false;
-            }, appconfig.IncludeScopes);
-
-            loggerFactory.AddFile("Logs/log-{Date}.txt", LogLevel.Trace);
+            loggerFactory.AddConsole();
+            loggerFactory.AddDebug();
 
             app.UseExceptionHandler(
                 options =>
