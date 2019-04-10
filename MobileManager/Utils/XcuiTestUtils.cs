@@ -147,26 +147,40 @@ namespace MobileManager.Utils
         /// <returns></returns>
         public string CloneOrPullGitRepository(GitRepository gitRepository, string gitPath)
         {
-            string result = string.Empty;
+            var outputFile = Path.Combine(GitRepositoryPath, TestReports,
+                $"git_{gitRepository.Id.ToString()}" + ".txt");
+
+            var result = string.Empty;
+
+            var exitcode = -1;
             if (Directory.Exists(gitPath))
             {
                 _logger.Debug($"{nameof(CloneOrPullGitRepository)}: Clean git repository and pull new changes.");
 
                 if (gitRepository.CleanRepository)
                 {
-                    result = _externalProcesses.RunProcessWithBashAndReadOutput("git", "clean -xdf", gitPath);
+                    exitcode = _externalProcesses.RunProcessWithBashAndReadOutput("git", "clean -xdf", gitPath,
+                        outputFile);
                 }
 
-                result += _externalProcesses.RunProcessWithBashAndReadOutput("git", "pull", gitPath);
+                exitcode = _externalProcesses.RunProcessWithBashAndReadOutput("git", "pull", gitPath, outputFile);
 
+                result = File.ReadAllText(outputFile);
                 _logger.Debug($"{nameof(CloneOrPullGitRepository)}: CLEAN + PULL: result=[{result}]");
             }
             else
             {
-                result = _externalProcesses.RunProcessAndReadOutput("git",
-                    $"clone {gitRepository.Remote} {gitPath}");
+                exitcode = _externalProcesses.RunProcessWithBashAndReadOutput("git", $"clone {gitRepository.Remote} {gitPath}", "",
+                    outputFile);
 
+                result = File.ReadAllText(outputFile);
                 _logger.Debug($"{nameof(CloneOrPullGitRepository)}: CLONE: result=[{result}]");
+            }
+
+            if (exitcode != 0)
+            {
+                result = File.ReadAllText(outputFile);
+                throw new Exception(result);
             }
 
             return result;
@@ -198,9 +212,10 @@ namespace MobileManager.Utils
             }
 
             result = "";
+            var exitCode = -1;
             try
             {
-                result = _externalProcesses.RunProcessWithBashAndReadOutput(
+                exitCode = _externalProcesses.RunProcessWithBashAndReadOutput(
                     "xcodebuild",
                     $"{workspace} -scheme {xcuitest.Scheme} -sdk {xcuitest.Sdk} {destination} {onlyTesting} {xcuitest.Action}",
                     Path.Combine(GitRepositoryPath, xcuitest.Project),
@@ -210,13 +225,23 @@ namespace MobileManager.Utils
             {
                 _logger.Error($"{nameof(RunXcuiTest)} failed with error.", e);
                 result = File.ReadAllText(outputFile);
-                throw new Exception(result);
-            }
-            finally
-            {
+
                 xcuitest.Results = result;
                 _xcuitestRepository.Add(xcuitest);
+
+                throw new Exception(result);
             }
+
+            if (exitCode != 0)
+            {
+                _logger.Error($"{nameof(RunXcuiTest)} failed with exitcode [{exitCode}].");
+                result = File.ReadAllText(outputFile);
+                throw new Exception(result);
+            }
+
+            xcuitest.Results = result;
+            _xcuitestRepository.Add(xcuitest);
+
 
             return outputFile;
         }

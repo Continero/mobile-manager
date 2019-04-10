@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using System.Threading;
 using MobileManager.Logging.Logger;
 using ToolBox.Bridge;
@@ -115,18 +116,18 @@ namespace MobileManager.Services
 
 
         /// <inheritdoc />
-        public string RunProcessWithBashAndReadOutput(string processName, string processArgs,
-            string workingDirectory = "", string pipe = "",
+        public int RunProcessWithBashAndReadOutput(string processName, string processArgs,
+            string workingDirectory = "", string outputFilePath = "",
             int timeout = 5000)
         {
             _logger.Debug(
-                $"{nameof(RunProcessWithBashAndReadOutput)} processName: [{processName}], args: [{processArgs}], workingDir [{workingDirectory}], pipe [{pipe}]");
+                $"{nameof(RunProcessWithBashAndReadOutput)} processName: [{processName}], args: [{processArgs}], workingDir [{workingDirectory}], pipe [{outputFilePath}]");
 
             var psi = new ProcessStartInfo()
             {
                 FileName = "/bin/bash",
                 Arguments =
-                    $"-c \"{processName} {processArgs}{(string.IsNullOrEmpty(pipe) ? string.Empty : $" >> {pipe} 2>&1")}\"",
+                    $"-c \"{processName} {processArgs}{(string.IsNullOrEmpty(outputFilePath) ? string.Empty : $" >> {outputFilePath} 2>&1")}\"",
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
@@ -142,19 +143,9 @@ namespace MobileManager.Services
             proc.WaitForExit(timeout);
             _logger.Debug($"{nameof(RunProcessWithBashAndReadOutput)} [{processName}] FINISHED.");
 
-            var output = proc.StandardOutput.ReadToEnd();
-            _logger.Debug($"{nameof(RunProcessWithBashAndReadOutput)} [{processName}] output: [{string.Join("\n", output)}]");
-
-            var errorOutput = proc.StandardError.ReadToEnd();
-            _logger.Debug($"{nameof(RunProcessWithBashAndReadOutput)} [{processName}] errorOutput: [{string.Join("\n", errorOutput)}]");
-
             Thread.Sleep(500);
-            if (proc.ExitCode != 0)
-            {
-                throw new Exception(errorOutput);
-            }
 
-            return output + errorOutput;
+            return proc.ExitCode;
         }
 
         /// <inheritdoc />

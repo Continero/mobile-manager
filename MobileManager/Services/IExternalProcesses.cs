@@ -32,10 +32,10 @@
         /// <param name="processName">Process name.</param>
         /// <param name="processArgs">Process arguments.</param>
         /// <param name="workingDirectory">Working directory</param>
-        /// <param name="pipe">Pipe output to another binary.</param>
+        /// <param name="outputFilePath">Pipe output to another binary.</param>
         /// <param name="timeout">Timeout.</param>
-        string RunProcessWithBashAndReadOutput(string processName, string processArgs, string workingDirectory = "",
-            string pipe = "",
+        int RunProcessWithBashAndReadOutput(string processName, string processArgs, string workingDirectory = "",
+            string outputFilePath = "",
             int timeout = 5000);
 
         string RunScriptWithBashAndReadOutput(string scriptLine, string workingDirectory = "", string pipe = "",

@@ -85,7 +85,16 @@ namespace MobileManager.Controllers
             LogRequest();
             var gitPath = Path.Combine(XcuiTestUtils.GitRepositoryPath, gitRepository.Name);
 
-            var result = _xcuiTestUtils.CloneOrPullGitRepository(gitRepository, gitPath);
+            var result = "";
+            try
+            {
+                result = _xcuiTestUtils.CloneOrPullGitRepository(gitRepository, gitPath);
+            }
+            catch (Exception e)
+            {
+                return StatusCodeExtension(500, e.Message);
+            }
+
 
             return new ObjectResult(result);
         }
