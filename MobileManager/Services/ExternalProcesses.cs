@@ -182,10 +182,10 @@ namespace MobileManager.Services
             _logger.Debug($"{nameof(RunScriptWithBashAndReadOutput)} [{scriptLine}] errorOutput: [{string.Join("\n", errorOutput)}]");
 
             Thread.Sleep(500);
-            if (proc.ExitCode != 0)
-            {
-                throw new Exception(errorOutput);
-            }
+//            if (proc.ExitCode != 0)
+//            {
+//                throw new Exception(errorOutput);
+//            }
 
             return output + errorOutput;
         }

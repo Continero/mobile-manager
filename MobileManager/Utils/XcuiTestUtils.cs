@@ -224,9 +224,8 @@ namespace MobileManager.Utils
             catch (Exception e)
             {
                 _logger.Error($"{nameof(RunXcuiTest)} failed with error.", e);
-                result = File.ReadAllText(outputFile);
 
-                xcuitest.Results = result;
+                xcuitest.Results = File.ReadAllText(outputFile);
                 _xcuitestRepository.Add(xcuitest);
 
                 throw new Exception(result);
@@ -235,11 +234,9 @@ namespace MobileManager.Utils
             if (exitCode != 0)
             {
                 _logger.Error($"{nameof(RunXcuiTest)} failed with exitcode [{exitCode}].");
-                result = File.ReadAllText(outputFile);
-                throw new Exception(result);
             }
 
-            xcuitest.Results = result;
+            xcuitest.Results = File.ReadAllText(outputFile);
             _xcuitestRepository.Add(xcuitest);
 
 
