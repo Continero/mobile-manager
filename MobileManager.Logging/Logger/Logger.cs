@@ -23,9 +23,7 @@ namespace MobileManager.Logging.Logger
         /// </summary>
         public ManagerLogger()
         {
-            ILoggerFactory loggerFactory = new LoggerFactory()
-                .AddConsole()
-                .AddDebug();
+            ILoggerFactory loggerFactory = new LoggerFactory();
 
             if (Debugger.IsAttached || Environment.GetEnvironmentVariable("MM_DEBUG_LOG") == "true")
             {

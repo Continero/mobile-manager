@@ -163,9 +163,6 @@ namespace MobileManager
 
             applicationLifetime.ApplicationStopped.Register(OnShutdown);
 
-            loggerFactory.AddConsole();
-            loggerFactory.AddDebug();
-
             app.UseExceptionHandler(
                 options =>
                 {

@@ -379,7 +379,7 @@ namespace MobileManager.Utils
             foreach (var device in checkedDevices)
             {
                 if (checkedDeviceIds.All(id => id != device.Id) && device.Status != DeviceStatus.Locked &&
-                    device.Status != DeviceStatus.LockedOffline)
+                    device.Status != DeviceStatus.LockedOffline && device.Status != DeviceStatus.Offline)
                 {
                     _logger.Debug(
                         $"{nameof(CheckAllDevicesInDevicePoolAreOnline)}: change device status from [{device.Status}] to [{nameof(DeviceStatus.Offline)}].");
