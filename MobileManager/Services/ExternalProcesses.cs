@@ -65,13 +65,14 @@ namespace MobileManager.Services
             proc.Start();
 
             proc.WaitForExit(timeout);
+            _logger.Debug($"{nameof(RunProcessAndReadOutput)} [{processName}] FINISHED.");
 
             var output = proc.StandardOutput.ReadToEnd();
-            _logger.Debug(string.Format("RunProcessAndReadOutput output: [{0}]", string.Join("\n", output)));
+            _logger.Debug($"{nameof(RunProcessAndReadOutput)} [{processName}] output: [{string.Join("\n", output)}]");
 
             var errorOutput = proc.StandardError.ReadToEnd();
-            _logger.Debug(string.Format("RunProcessAndReadOutput errorOutput: [{0}]",
-                string.Join("\n", errorOutput)));
+            _logger.Debug($"{nameof(RunProcessAndReadOutput)} [{processName}] errorOutput: [{string.Join("\n", errorOutput)}]");
+
 
             return output + errorOutput;
         }
@@ -100,13 +101,14 @@ namespace MobileManager.Services
             proc.Start();
 
             proc.WaitForExit(timeout);
+            _logger.Debug($"{nameof(RunProcessAndReadOutput)} [{processName}] FINISHED.");
 
             var output = proc.StandardOutput.ReadToEnd();
-            _logger.Debug(string.Format("RunProcessAndReadOutput output: [{0}]", string.Join("\n", output)));
+            _logger.Debug($"{nameof(RunProcessAndReadOutput)} [{processName}] output: [{string.Join("\n", output)}]");
 
             var errorOutput = proc.StandardError.ReadToEnd();
-            _logger.Debug(string.Format("RunProcessAndReadOutput errorOutput: [{0}]",
-                string.Join("\n", errorOutput)));
+            _logger.Debug($"{nameof(RunProcessAndReadOutput)} [{processName}] errorOutput: [{string.Join("\n", errorOutput)}]");
+
 
             return output + errorOutput;
         }
@@ -138,13 +140,13 @@ namespace MobileManager.Services
             proc.Start();
 
             proc.WaitForExit(timeout);
+            _logger.Debug($"{nameof(RunProcessWithBashAndReadOutput)} [{processName}] FINISHED.");
 
             var output = proc.StandardOutput.ReadToEnd();
-            _logger.Debug(string.Format("RunProcessAndReadOutput output: [{0}]", string.Join("\n", output)));
+            _logger.Debug($"{nameof(RunProcessWithBashAndReadOutput)} [{processName}] output: [{string.Join("\n", output)}]");
 
             var errorOutput = proc.StandardError.ReadToEnd();
-            _logger.Debug(string.Format("RunProcessAndReadOutput errorOutput: [{0}]",
-                string.Join("\n", errorOutput)));
+            _logger.Debug($"{nameof(RunProcessWithBashAndReadOutput)} [{processName}] errorOutput: [{string.Join("\n", errorOutput)}]");
 
             Thread.Sleep(500);
             if (proc.ExitCode != 0)
@@ -180,13 +182,13 @@ namespace MobileManager.Services
             proc.Start();
 
             proc.WaitForExit(timeout);
+            _logger.Debug($"{nameof(RunScriptWithBashAndReadOutput)} [{scriptLine}] FINISHED.");
 
             var output = proc.StandardOutput.ReadToEnd();
-            _logger.Debug(string.Format("RunProcessAndReadOutput output: [{0}]", string.Join("\n", output)));
+            _logger.Debug($"{nameof(RunScriptWithBashAndReadOutput)} [{scriptLine}] output: [{string.Join("\n", output)}]");
 
             var errorOutput = proc.StandardError.ReadToEnd();
-            _logger.Debug(string.Format("RunProcessAndReadOutput errorOutput: [{0}]",
-                string.Join("\n", errorOutput)));
+            _logger.Debug($"{nameof(RunScriptWithBashAndReadOutput)} [{scriptLine}] errorOutput: [{string.Join("\n", errorOutput)}]");
 
             Thread.Sleep(500);
             if (proc.ExitCode != 0)
