@@ -285,7 +285,7 @@ namespace MobileManager.Services
                 if (deviceInDevicePool.Status == DeviceStatus.Offline)
                 {
                     //update device properties
-                    GetAndSetDeviceProperties(deviceInDevicePool);
+                    //GetAndSetDeviceProperties(deviceInDevicePool);
                     deviceInDevicePool.Status = DeviceStatus.Online;
                     deviceInDevicePool.Available = true;
                     await _restClient.UpdateDevice(deviceInDevicePool);

@@ -102,7 +102,7 @@ namespace MobileManager.Services
                             {
                                 if (deviceInDevicePool.Status == DeviceStatus.Offline)
                                 {
-                                    SetNewDeviceProperties(deviceInDevicePool);
+                                    //SetNewDeviceProperties(deviceInDevicePool);
                                     await MountDeveloperDiskAsync(deviceInDevicePool);
                                     deviceInDevicePool.Status = DeviceStatus.Online;
                                     deviceInDevicePool.Available = true;
@@ -112,8 +112,7 @@ namespace MobileManager.Services
 
                                 _logger.Info(
                                     $"{nameof(LoadConnectedIosDevicesAsync)}: Device {deviceId} is already stored in database.");
-                                //update device properties
-                                SetNewDeviceProperties(deviceInDevicePool);
+
                                 await _restClient.UpdateDevice(deviceInDevicePool);
                                 await MountDeveloperDiskAsync(deviceInDevicePool);
                                 continue;
