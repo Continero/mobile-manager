@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc;
 using MobileManager.Database.Repositories;
 using MobileManager.Database.Repositories.Interfaces;
+using MobileManager.Http.Clients.Interfaces;
 using MobileManager.Logging.Logger;
 using MobileManager.Models.Git;
 using MobileManager.Models.Xcuitest;
@@ -22,6 +23,7 @@ namespace MobileManager.Utils
         private readonly IManagerLogger _logger;
         private readonly IExternalProcesses _externalProcesses;
         private readonly IRepository<Xcuitest> _xcuitestRepository;
+        private readonly IRestClient _restClient;
 
         /// <summary>
         /// Test reports.
@@ -39,76 +41,79 @@ namespace MobileManager.Utils
         /// </summary>
         /// <param name="logger"></param>
         /// <param name="externalProcesses"></param>
+        /// <param name="xcuitestRepository"></param>
+        /// <param name="restClient"></param>
         public XcuiTestUtils(IManagerLogger logger, IExternalProcesses externalProcesses,
-            IRepository<Xcuitest> xcuitestRepository)
+            IRepository<Xcuitest> xcuitestRepository, IRestClient restClient)
         {
             _logger = logger;
             _externalProcesses = externalProcesses;
             _xcuitestRepository = xcuitestRepository;
+            _restClient = restClient;
         }
 
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="xcuitest"></param>
-        /// <param name="outputFile"></param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentOutOfRangeException"></exception>
-        public IActionResult GetContentInValidFormat(IXcuitest xcuitest, string outputFile)
-        {
-            switch (xcuitest.OutputFormat)
-            {
-                case XcuitestOutputFormat.PlainText:
-                    return new ContentResult()
-                    {
-                        Content = System.IO.File.ReadAllText(outputFile + ".txt"),
-                        ContentType = "text/plain",
-                    };
-                case XcuitestOutputFormat.Html:
-                    return new ContentResult()
-                    {
-                        Content = System.IO.File.ReadAllText(outputFile + ".html"),
-                        ContentType = "text/html",
-                    };
-                case XcuitestOutputFormat.JunitXml:
-                    return new ContentResult()
-                    {
-                        Content = System.IO.File.ReadAllText(outputFile + ".xml"),
-                        ContentType = "text/xml",
-                    };
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-        }
+//        /// <summary>
+//        ///
+//        /// </summary>
+//        /// <param name="xcuitest"></param>
+//        /// <param name="outputFile"></param>
+//        /// <returns></returns>
+//        /// <exception cref="ArgumentOutOfRangeException"></exception>
+//        public IActionResult GetContentInValidFormat(IXcuitest xcuitest, string outputFile)
+//        {
+//            switch (xcuitest.OutputFormat)
+//            {
+//                case XcuitestOutputFormat.PlainText:
+//                    return new ContentResult()
+//                    {
+//                        Content = System.IO.File.ReadAllText(outputFile + ".txt"),
+//                        ContentType = "text/plain",
+//                    };
+//                case XcuitestOutputFormat.Html:
+//                    return new ContentResult()
+//                    {
+//                        Content = System.IO.File.ReadAllText(outputFile + ".html"),
+//                        ContentType = "text/html",
+//                    };
+//                case XcuitestOutputFormat.JunitXml:
+//                    return new ContentResult()
+//                    {
+//                        Content = System.IO.File.ReadAllText(outputFile + ".xml"),
+//                        ContentType = "text/xml",
+//                    };
+//                default:
+//                    throw new ArgumentOutOfRangeException();
+//            }
+//        }
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="xcuitest"></param>
-        /// <param name="outputFormat"></param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentOutOfRangeException"></exception>
-        public string GetOutputFormatFile(IXcuitest xcuitest, out string outputFormat)
-        {
-            var outputFile = Path.Combine(GitRepositoryPath, TestReports, xcuitest.Id.ToString());
-            switch (xcuitest.OutputFormat)
-            {
-                case XcuitestOutputFormat.PlainText:
-                    outputFormat = $"--output {outputFile}.txt";
-                    break;
-                case XcuitestOutputFormat.Html:
-                    outputFormat = $"--report html --output {outputFile}.html";
-                    break;
-                case XcuitestOutputFormat.JunitXml:
-                    outputFormat = $"--report junit --output {outputFile}.xml";
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-
-            return outputFile;
-        }
+//        /// <summary>
+//        ///
+//        /// </summary>
+//        /// <param name="xcuitest"></param>
+//        /// <param name="outputFormat"></param>
+//        /// <returns></returns>
+//        /// <exception cref="ArgumentOutOfRangeException"></exception>
+//        public string GetOutputFormatFile(IXcuitest xcuitest, out string outputFormat)
+//        {
+//            var outputFile = Path.Combine(GitRepositoryPath, TestReports, xcuitest.Id.ToString());
+//            switch (xcuitest.OutputFormat)
+//            {
+//                case XcuitestOutputFormat.PlainText:
+//                    outputFormat = $"--output {outputFile}.txt";
+//                    break;
+//                case XcuitestOutputFormat.Html:
+//                    outputFormat = $"--report html --output {outputFile}.html";
+//                    break;
+//                case XcuitestOutputFormat.JunitXml:
+//                    outputFormat = $"--report junit --output {outputFile}.xml";
+//                    break;
+//                default:
+//                    throw new ArgumentOutOfRangeException();
+//            }
+//
+//            return outputFile;
+//        }
 
         /// <summary>
         ///
@@ -167,10 +172,10 @@ namespace MobileManager.Utils
             return result;
         }
 
-        public string RunXcuiTest(Xcuitest xcuitest, out string outputFormat, out string result)
+        public string RunXcuiTest(Xcuitest xcuitest, out string result)
         {
-            var outputFile = GetOutputFormatFile(xcuitest, out outputFormat);
-            outputFile = Path.Combine(GitRepositoryPath, TestReports, xcuitest.Id.ToString()) + ".txt";
+            //var outputFile = GetOutputFormatFile(xcuitest, out outputFormat);
+            var outputFile = Path.Combine(GitRepositoryPath, TestReports, xcuitest.Id.ToString()) + ".txt";
 
             var onlyTesting = string.Empty;
             if (!string.IsNullOrEmpty(xcuitest.OnlyTestingOption))
@@ -184,12 +189,20 @@ namespace MobileManager.Utils
                 workspace = $"-workspace {xcuitest.Workspace}";
             }
 
+            var reservation = _restClient.GetAppliedReservation(xcuitest.ReservationId).Result;
+
+            var destination = "";
+            foreach (var reservedDevice in reservation.ReservedDevices)
+            {
+                destination += $"-destination \\\"id={reservedDevice.Id}\\\" ";
+            }
+
             result = "";
             try
             {
                 result = _externalProcesses.RunProcessWithBashAndReadOutput(
                     "xcodebuild",
-                    $"{workspace} -scheme {xcuitest.Scheme} -sdk {xcuitest.Sdk} -destination \\\"{xcuitest.Destination}\\\" {onlyTesting} {xcuitest.Action}",
+                    $"{workspace} -scheme {xcuitest.Scheme} -sdk {xcuitest.Sdk} {destination} {onlyTesting} {xcuitest.Action}",
                     Path.Combine(GitRepositoryPath, xcuitest.Project),
                     $"{outputFile}");
             }

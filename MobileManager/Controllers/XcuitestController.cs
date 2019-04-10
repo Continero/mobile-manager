@@ -45,7 +45,7 @@ namespace MobileManager.Controllers
         {
             _logger = logger;
             _restClient = restClient;
-            _xcuiTestUtils = new XcuiTestUtils(_logger, externalProcesses, xcuitestRepository);
+            _xcuiTestUtils = new XcuiTestUtils(_logger, externalProcesses, xcuitestRepository, _restClient);
 
             if (!Directory.Exists(XcuiTestUtils.GitRepositoryPath))
             {
@@ -119,7 +119,6 @@ namespace MobileManager.Controllers
 
             var outputFile = "";
             var result = "";
-            var outputFormat = "";
 
             if (xcuitest.CustomPreBuildScript.ScriptLine.Any())
             {
@@ -127,7 +126,7 @@ namespace MobileManager.Controllers
                 {
                     _xcuiTestUtils.RunCustomPreBuildScript(xcuitest);
 
-                    outputFile = _xcuiTestUtils.RunXcuiTest(xcuitest, out outputFormat, out result);
+                    outputFile = _xcuiTestUtils.RunXcuiTest(xcuitest, out result);
                 }
                 catch (Exception e)
                 {

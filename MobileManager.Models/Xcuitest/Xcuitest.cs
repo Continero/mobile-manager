@@ -34,9 +34,6 @@ namespace MobileManager.Models.Xcuitest
         public string Sdk { get; set; }
 
         /// <inheritdoc />
-        public string Destination { get; set; }
-
-        /// <inheritdoc />
         public string Action { get; set; }
 
         /// <inheritdoc />
@@ -47,9 +44,6 @@ namespace MobileManager.Models.Xcuitest
 
         /// <inheritdoc />
         public string Results { get; set; }
-
-        /// <inheritdoc />
-        public XcuitestOutputFormat OutputFormat { get; set; }
 
         /// <inheritdoc />
         public CustomBashScript CustomPreBuildScript { get; set; }

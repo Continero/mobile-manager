@@ -16,8 +16,6 @@ namespace MobileManager.Models.Xcuitest
 
         string Sdk { get; set; }
 
-        string Destination { get; set; }
-
         string Action { get; set; }
 
         string Workspace { get; set; }
@@ -27,8 +25,6 @@ namespace MobileManager.Models.Xcuitest
         Guid Id { get; set; }
 
         string Results { get; set; }
-
-        XcuitestOutputFormat OutputFormat { get; set; }
 
         CustomBashScript CustomPreBuildScript { get; set; }
     }
