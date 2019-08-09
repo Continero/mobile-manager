@@ -239,7 +239,6 @@ namespace MobileManagerTests.Controllers
             Assert.Empty(viewResult);
         }
 
-
         #endregion
 
         #region GetById Tests

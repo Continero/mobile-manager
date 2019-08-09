@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MobileManager.Controllers.Interfaces;
 using MobileManager.Http.Clients.Interfaces;
@@ -29,7 +30,8 @@ namespace MobileManager.Controllers
         /// <param name="restClient">Rest client.</param>
         /// <param name="logger">Logger</param>
         /// <param name="externalProcesses"></param>
-        public AdbController(IRestClient restClient, IManagerLogger logger, IExternalProcesses externalProcesses) : base(logger)
+        public AdbController(IRestClient restClient, IManagerLogger logger, IExternalProcesses externalProcesses) :
+            base(logger)
         {
             _restClient = restClient;
             _logger = logger;
@@ -45,11 +47,12 @@ namespace MobileManager.Controllers
         /// </remarks>
         /// <returns>Result of ADB command</returns>
         /// <param name="adbCommand">ADB command without "adb" executable in the name</param>
-        /// <response code="200">Command executed successfully.</response>
-        /// <response code="500">Failed to run adb command.</response>
         [HttpPost("command")]
+        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
         public IActionResult Command([FromBody] AdbCommand adbCommand)
         {
+            LogRequest();
             if (!IsAdbCommandExecutable(adbCommand, out var actionResult)) return actionResult;
 
             string output;
@@ -76,11 +79,12 @@ namespace MobileManager.Controllers
         /// </remarks>
         /// <returns>Result of ADB command</returns>
         /// <param name="adbCommand">ADB shell command without "adb shell" executable in the name</param>
-        /// <response code="200">Command executed successfully.</response>
-        /// <response code="500">Failed to run adb command.</response>
         [HttpPost("shellCommand")]
+        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
         public IActionResult ShellAdbCommand([FromBody] AdbCommand adbCommand)
         {
+            LogRequest();
             if (!IsAdbCommandExecutable(adbCommand, out var actionResult)) return actionResult;
 
             string output;
@@ -101,8 +105,6 @@ namespace MobileManager.Controllers
         private bool IsAdbCommandExecutable(IAdbCommand adbCommand, out IActionResult actionResult)
         {
             actionResult = null;
-
-            LogRequestToDebug();
 
             if (adbCommand?.AndroidDeviceId == null || adbCommand.Command == null)
             {

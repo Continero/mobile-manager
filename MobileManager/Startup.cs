@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Threading;
@@ -24,8 +23,10 @@ using MobileManager.Http.Clients;
 using MobileManager.Http.Clients.Interfaces;
 using MobileManager.Logging.Logger;
 using MobileManager.Models.Devices;
+using MobileManager.Models.Git;
 using MobileManager.Models.Logger;
 using MobileManager.Models.Reservations;
+using MobileManager.Models.Xcuitest;
 using MobileManager.Services;
 using MobileManager.Services.Interfaces;
 using MobileManager.Utils;
@@ -64,7 +65,6 @@ namespace MobileManager
         /// Configures the services.
         /// </summary>
         /// <param name="services">Services.</param>
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             using (var deviceDbContext = new GeneralDbContext())
@@ -82,7 +82,7 @@ namespace MobileManager
 
             JsonConvert.DefaultSettings = () => new JsonSerializerSettings
             {
-                Formatting = Formatting.Indented,
+                //Formatting = Formatting.Indented,
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
             };
 
@@ -117,7 +117,9 @@ namespace MobileManager
                 .AddTransient<IRepository<Reservation>, ReservationQueueRepository>()
                 .AddTransient<IRepository<ReservationApplied>, ReservationAppliedRepository>()
                 .AddTransient<IRepository<AppiumProcess>, AppiumRepository>()
-                .AddTransient<IRepository<LogMessage>, LoggerRepository>();
+                .AddTransient<IRepository<LogMessage>, LoggerRepository>()
+                .AddTransient<IRepository<Xcuitest>, XcuitestRepository>()
+                .AddTransient<IRepository<GitRepository>, GitRepositoryRepository>();
 
             //services.AddSingleton<IManagerConfiguration, ManagerConfiguration>();
             services.AddSingleton<IRestClient, RestClient>()
@@ -129,7 +131,7 @@ namespace MobileManager
                 .AddSingleton<IDeviceUtils, DeviceUtils>()
                 .AddSingleton<IScreenshotService, ScreenshotService>()
                 .AddSingleton<IExternalProcesses, ExternalProcesses>();
-                
+
 
             services.AddMvcCore().AddApiExplorer();
 
@@ -160,23 +162,6 @@ namespace MobileManager
             var appconfig = AppConfigurationProvider.Get<AppConfiguration>();
 
             applicationLifetime.ApplicationStopped.Register(OnShutdown);
-
-            loggerFactory.AddConsole((logText, logLevel) =>
-            {
-                if (Debugger.IsAttached)
-                {
-                    return true;
-                }
-
-                if (logLevel >= appconfig.DefaultLogLevel)
-                {
-                    return true;
-                }
-
-                return false;
-            }, appconfig.IncludeScopes);
-
-            loggerFactory.AddFile("Logs/log-{Date}.txt", LogLevel.Trace);
 
             app.UseExceptionHandler(
                 options =>

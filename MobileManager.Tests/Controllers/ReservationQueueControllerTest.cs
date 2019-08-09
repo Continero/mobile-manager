@@ -97,7 +97,7 @@ namespace MobileManagerTests.Controllers
             _httpLocalhost =
                 $"http://{_config.Object.LocalIpAddress}:{_config.Object.ListeningPort}";
         }
-        
+
         #region GetAllReservations Tests
 
         [Fact]
@@ -107,7 +107,8 @@ namespace MobileManagerTests.Controllers
             var mockRepository = new Mock<IRepository<Reservation>>();
             mockRepository.Setup(mpr => mpr.GetAll()).Returns(GetTestReservations());
 
-            var controller = new ReservationsQueueController(mockRepository.Object, _restClient, Logger, _externalProcesses);
+            var controller =
+                new ReservationsQueueController(mockRepository.Object, _restClient, Logger, _externalProcesses);
 
             // Act
             var result = controller.GetAll();
@@ -126,7 +127,8 @@ namespace MobileManagerTests.Controllers
             var mockRepository = new Mock<IRepository<Reservation>>();
             mockRepository.Setup(mpr => mpr.GetAll()).Returns(new List<Reservation>());
 
-            var controller = new ReservationsQueueController(mockRepository.Object, _restClient, Logger, _externalProcesses);
+            var controller =
+                new ReservationsQueueController(mockRepository.Object, _restClient, Logger, _externalProcesses);
 
             // Act
             var result = controller.GetAll();
@@ -135,11 +137,11 @@ namespace MobileManagerTests.Controllers
             Assert.IsType<List<Reservation>>(result);
             Assert.Empty(result);
         }
-        
+
         #endregion
 
         #region GetReservation Tests
-        
+
         [Fact]
         public void GetReservation_reservation1()
         {
@@ -147,7 +149,8 @@ namespace MobileManagerTests.Controllers
             var mockRepository = new Mock<IRepository<Reservation>>();
             mockRepository.Setup(mpr => mpr.Find(_reservation1.Id)).Returns(_reservation1);
 
-            var controller = new ReservationsQueueController(mockRepository.Object, _restClient, Logger, _externalProcesses);
+            var controller =
+                new ReservationsQueueController(mockRepository.Object, _restClient, Logger, _externalProcesses);
 
             // Act
             var result = controller.GetById(_reservation1.Id);
@@ -164,7 +167,8 @@ namespace MobileManagerTests.Controllers
             var mockRepository = new Mock<IRepository<Reservation>>();
             mockRepository.Setup(mpr => mpr.Find(_reservation2.Id)).Returns(_reservation2);
 
-            var controller = new ReservationsQueueController(mockRepository.Object, _restClient, Logger, _externalProcesses);
+            var controller =
+                new ReservationsQueueController(mockRepository.Object, _restClient, Logger, _externalProcesses);
 
             // Act
             var result = controller.GetById(_reservation2.Id);
@@ -181,7 +185,8 @@ namespace MobileManagerTests.Controllers
             var mockRepository = new Mock<IRepository<Reservation>>();
             mockRepository.Setup(mpr => mpr.Find(_reservation1.Id)).Returns((Reservation) null);
 
-            var controller = new ReservationsQueueController(mockRepository.Object, _restClient, Logger, _externalProcesses);
+            var controller =
+                new ReservationsQueueController(mockRepository.Object, _restClient, Logger, _externalProcesses);
 
             // Act
             var result = controller.GetById(_reservation1.Id);
@@ -189,7 +194,7 @@ namespace MobileManagerTests.Controllers
             // Assert
             Assert.IsType<NotFoundObjectResult>(result);
         }
-        
+
 
         [Fact]
         public void GetReservation_empty_Input()
@@ -198,7 +203,8 @@ namespace MobileManagerTests.Controllers
             var mockRepository = new Mock<IRepository<Reservation>>();
             mockRepository.Setup(mpr => mpr.Find("")).Returns((Reservation) null);
 
-            var controller = new ReservationsQueueController(mockRepository.Object, _restClient, Logger, _externalProcesses);
+            var controller =
+                new ReservationsQueueController(mockRepository.Object, _restClient, Logger, _externalProcesses);
 
             // Act
             var result = controller.GetById("");
@@ -206,11 +212,11 @@ namespace MobileManagerTests.Controllers
             // Assert
             Assert.IsType<NotFoundObjectResult>(result);
         }
-        
+
         #endregion
 
         #region CreateAsync Tests
-        
+
         [Fact]
         public async void CreateReservation_reservation1()
         {
@@ -229,7 +235,8 @@ namespace MobileManagerTests.Controllers
 
             var restClient = new RestClient(_config.Object,
                 new HttpClient(mockHttp), Logger);
-            var controller = new ReservationsQueueController(mockRepository.Object, restClient, Logger, _externalProcesses);
+            var controller =
+                new ReservationsQueueController(mockRepository.Object, restClient, Logger, _externalProcesses);
 
             // Act
             var result = await controller.CreateAsync(_reservation1);
@@ -238,7 +245,7 @@ namespace MobileManagerTests.Controllers
             var viewResult = Assert.IsType<CreatedAtRouteResult>(result);
             Assert.Equal(_reservation1, viewResult.Value);
         }
-        
+
         [Fact]
         public async void CreateReservation_NullRequest_BadRequest()
         {
@@ -248,7 +255,8 @@ namespace MobileManagerTests.Controllers
 
             var mockHttp = new MockHttpMessageHandler();
             var restClient = new RestClient(_config.Object, new HttpClient(mockHttp), Logger);
-            var controller = new ReservationsQueueController(mockRepository.Object, restClient, Logger, _externalProcesses);
+            var controller =
+                new ReservationsQueueController(mockRepository.Object, restClient, Logger, _externalProcesses);
 
             // Act
             var result = await controller.CreateAsync(null);
@@ -256,7 +264,7 @@ namespace MobileManagerTests.Controllers
             // Assert
             Assert.IsType<BadRequestObjectResult>(result);
         }
-        
+
         [Fact]
         public async void CreateReservation_AddThrowsException_ErrorStatusCode()
         {
@@ -275,7 +283,8 @@ namespace MobileManagerTests.Controllers
 
             var restClient = new RestClient(_config.Object,
                 new HttpClient(mockHttp), Logger);
-            var controller = new ReservationsQueueController(mockRepository.Object, restClient, Logger, _externalProcesses);
+            var controller =
+                new ReservationsQueueController(mockRepository.Object, restClient, Logger, _externalProcesses);
 
             // Act
             var result = await controller.CreateAsync(_reservation1);
@@ -301,7 +310,8 @@ namespace MobileManagerTests.Controllers
 
             var restClient = new RestClient(_config.Object,
                 new HttpClient(mockHttp), Logger);
-            var controller = new ReservationsQueueController(mockRepository.Object, restClient, Logger, _externalProcesses);
+            var controller =
+                new ReservationsQueueController(mockRepository.Object, restClient, Logger, _externalProcesses);
 
             // Act
             var result = await controller.CreateAsync(_reservation1);
@@ -332,7 +342,8 @@ namespace MobileManagerTests.Controllers
 
             var restClient = new RestClient(_config.Object,
                 new HttpClient(mockHttp), Logger);
-            var controller = new ReservationsQueueController(mockRepository.Object, restClient, Logger, _externalProcesses);
+            var controller =
+                new ReservationsQueueController(mockRepository.Object, restClient, Logger, _externalProcesses);
 
             // Act
             var result = await controller.CreateAsync(reservation);
@@ -361,7 +372,8 @@ namespace MobileManagerTests.Controllers
 
             var restClient = new RestClient(_config.Object,
                 new HttpClient(mockHttp), Logger);
-            var controller = new ReservationsQueueController(mockRepository.Object, restClient, Logger, _externalProcesses);
+            var controller =
+                new ReservationsQueueController(mockRepository.Object, restClient, Logger, _externalProcesses);
 
             // Act
             var result = await controller.CreateAsync(reservation);
@@ -390,6 +402,7 @@ namespace MobileManagerTests.Controllers
                     }
                 }
             };
+
             // Arrange
             var mockRepository = new Mock<IRepository<Reservation>>();
             mockRepository.Setup(mpr => mpr.Add(reservationDuplicateDeviceId));
@@ -403,7 +416,8 @@ namespace MobileManagerTests.Controllers
 
             var restClient = new RestClient(_config.Object,
                 new HttpClient(mockHttp), Logger);
-            var controller = new ReservationsQueueController(mockRepository.Object, restClient, Logger, _externalProcesses);
+            var controller =
+                new ReservationsQueueController(mockRepository.Object, restClient, Logger, _externalProcesses);
 
             // Act
             var result = await controller.CreateAsync(reservationDuplicateDeviceId);
@@ -412,8 +426,9 @@ namespace MobileManagerTests.Controllers
             var viewResult = Assert.IsType<BadRequestObjectResult>(result);
             Assert.Equal("RequestedDevices property contains duplicate DeviceId.", viewResult.Value);
         }
+
         #endregion
-        
+
 
         #region Delete Tests
 
@@ -436,7 +451,8 @@ namespace MobileManagerTests.Controllers
 
             var restClient = new RestClient(_config.Object,
                 new HttpClient(mockHttp), Logger);
-            var controller = new ReservationsQueueController(mockRepository.Object, restClient, Logger, _externalProcesses);
+            var controller =
+                new ReservationsQueueController(mockRepository.Object, restClient, Logger, _externalProcesses);
 
             // Act
             var result = await controller.CreateAsync(_reservation1);
@@ -451,7 +467,7 @@ namespace MobileManagerTests.Controllers
             Assert.IsType<OkResult>(resultDelete);
             Assert.Empty(controller.GetAll());
         }
-        
+
         [Fact]
         public void DeleteReservation_RemoveThrowsException_ErrorStatusCode()
         {
@@ -472,7 +488,8 @@ namespace MobileManagerTests.Controllers
 
             var restClient = new RestClient(_config.Object,
                 new HttpClient(mockHttp), Logger);
-            var controller = new ReservationsQueueController(mockRepository.Object, restClient, Logger, _externalProcesses);
+            var controller =
+                new ReservationsQueueController(mockRepository.Object, restClient, Logger, _externalProcesses);
 
             var result = controller.Delete(_reservation1.Id);
 
@@ -500,7 +517,8 @@ namespace MobileManagerTests.Controllers
 
             var restClient = new RestClient(_config.Object,
                 new HttpClient(mockHttp), Logger);
-            var controller = new ReservationsQueueController(mockRepository.Object, restClient, Logger, _externalProcesses);
+            var controller =
+                new ReservationsQueueController(mockRepository.Object, restClient, Logger, _externalProcesses);
 
             // Act
             var result = await controller.CreateAsync(_reservation1);
@@ -515,7 +533,7 @@ namespace MobileManagerTests.Controllers
             var viewResultDelete = Assert.IsType<NotFoundObjectResult>(resultDelete);
             Assert.Equal("Reservation not found in the database.", viewResultDelete.Value);
         }
-        
+
         #endregion
     }
 }

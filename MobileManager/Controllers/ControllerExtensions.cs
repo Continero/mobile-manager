@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MobileManager.Logging.Logger;
@@ -103,9 +104,9 @@ namespace MobileManager.Controllers
         /// Log incoming request data to debug.
         /// </summary>
         [NonAction]
-        public void LogRequestToDebug()
+        public void LogRequest()
         {
-            _logger.Debug($"{GetDetails(Request)}");
+            Task.Run(() => { _logger.Debug($"{GetDetails(Request)}"); });
         }
 
         private static string GetDetails(HttpRequest request)

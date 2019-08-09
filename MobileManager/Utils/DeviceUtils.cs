@@ -3,11 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using MobileManager.Http.Clients;
 using MobileManager.Http.Clients.Interfaces;
 using MobileManager.Logging.Logger;
 using MobileManager.Models.Devices;
 using MobileManager.Models.Devices.Enums;
 using MobileManager.Models.Devices.Interfaces;
+using MobileManager.Models.Reservations.enums;
+using MobileManager.Models.Reservations.Interfaces;
 using MobileManager.Services;
 using MobileManager.Services.Interfaces;
 using Newtonsoft.Json;
@@ -43,10 +46,73 @@ namespace MobileManager.Utils
         /// <param name="deviceId">Device identifier.</param>
         /// <param name="restClient">Rest client.</param>
         /// <param name="appiumService">Appium service.</param>
-        public async Task<Device> LockDevice(string deviceId, IRestClient restClient,
+        public async Task<Device> LockDeviceAppium(string deviceId, IRestClient restClient,
             IAppiumService appiumService)
         {
-            _logger.Debug($"{nameof(LockDevice)}: device id [{deviceId}].");
+            var device = await SetDeviceAvailabilityToFalse(deviceId, restClient);
+
+            _logger.Debug($"{nameof(LockDeviceAppium)}: device id [{deviceId}] start Appium.");
+            try
+            {
+                device.AppiumEndpoint = Task.Run(() => appiumService.StartAppiumForDeviceId(deviceId)).Result;
+            }
+            catch (Exception e)
+            {
+                _logger.Error($"{nameof(LockDeviceAppium)} failed with exception.", e);
+                await UnlockDeviceAppium(device.Id, restClient, appiumService);
+                throw;
+            }
+
+            return await SetDeviceStatusToLocked(deviceId, restClient, device);
+        }
+
+        /// <inheritdoc />
+        /// <summary>
+        /// Locks the device.
+        /// </summary>
+        /// <returns>The device.</returns>
+        /// <param name="deviceId">Device identifier.</param>
+        /// <param name="restClient">Rest client.</param>
+        public async Task<Device> LockDeviceXcuiTest(string deviceId, IRestClient restClient)
+        {
+            var device = await SetDeviceAvailabilityToFalse(deviceId, restClient);
+
+            _logger.Debug($"{nameof(LockDeviceAppium)}: device id [{deviceId}] for XCUITest.");
+
+            return await SetDeviceStatusToLocked(deviceId, restClient, device);
+        }
+
+        /// <inheritdoc />
+        /// <summary>
+        /// Locks the device.
+        /// </summary>
+        /// <returns>The device.</returns>
+        /// <param name="deviceId">Device identifier.</param>
+        /// <param name="restClient">Rest client.</param>
+        public async Task<Device> LockDeviceManual(string deviceId, IRestClient restClient)
+        {
+            var device = await SetDeviceAvailabilityToFalse(deviceId, restClient);
+
+            _logger.Debug($"{nameof(LockDeviceAppium)}: device id [{deviceId}] for Manual.");
+
+            return await SetDeviceStatusToLocked(deviceId, restClient, device);
+        }
+
+        private async Task<Device> SetDeviceStatusToLocked(string deviceId, IRestClient restClient, Device device)
+        {
+            _logger.Debug($"{nameof(LockDeviceAppium)}: device id [{deviceId}] set status from [{device.Status}] to LOCKED");
+
+            device.Status = DeviceStatus.Locked;
+
+            var updatedDevice = await restClient.UpdateDevice(device);
+            _logger.Debug($"{nameof(LockDeviceAppium)}: updated device [{JsonConvert.SerializeObject(updatedDevice)}]");
+
+            return updatedDevice;
+        }
+
+        private async Task<Device> SetDeviceAvailabilityToFalse(string deviceId, IRestClient restClient)
+        {
+            _logger.Debug($"{nameof(LockDeviceAppium)}: device id [{deviceId}].");
 
             var device = await restClient.GetDevice(deviceId);
 
@@ -56,29 +122,9 @@ namespace MobileManager.Utils
             }
 
             _logger.Debug(
-                $"{nameof(LockDevice)}: set device id [{deviceId}] available from [{device.Available}] to false.");
+                $"{nameof(LockDeviceAppium)}: set device id [{deviceId}] available from [{device.Available}] to false.");
             device.Available = false;
-
-            _logger.Debug($"{nameof(LockDevice)}: device id [{deviceId}] stop running Appium");
-            try
-            {
-                device.AppiumEndpoint = Task.Run(() => appiumService.StartAppiumForDeviceId(deviceId)).Result;
-            }
-            catch (Exception e)
-            {
-                _logger.Error($"{nameof(LockDevice)} failed with exception.", e);
-                await UnlockDevice(device.Id, restClient, appiumService);
-                throw;
-            }
-
-            _logger.Debug($"{nameof(LockDevice)}: device id [{deviceId}] set status from [{device.Status}] to LOCKED");
-
-            device.Status = DeviceStatus.Locked;
-
-            var updatedDevice = await restClient.UpdateDevice(device);
-            _logger.Debug($"{nameof(LockDevice)}: updated device [{JsonConvert.SerializeObject(updatedDevice)}]");
-
-            return updatedDevice;
+            return device;
         }
 
         /// <inheritdoc />
@@ -89,10 +135,69 @@ namespace MobileManager.Utils
         /// <param name="deviceId">Device identifier.</param>
         /// <param name="restClient">Rest client.</param>
         /// <param name="appiumService">Appium service.</param>
-        public async Task<Device> UnlockDevice(string deviceId, IRestClient restClient,
+        public async Task<Device> UnlockDeviceAppium(string deviceId, IRestClient restClient,
             IAppiumService appiumService)
         {
-            _logger.Debug($"{nameof(UnlockDevice)}: device id [{deviceId}].");
+            var device = await SetDeviceAvailabilityToTrue(deviceId, restClient);
+
+            _logger.Debug($"{nameof(UnlockDeviceAppium)}: device id [{deviceId}] stop running Appium");
+            if (!await appiumService.StopAppiumForDeviceIdAsync(deviceId))
+            {
+                return device;
+            }
+
+            device.AppiumEndpoint = "";
+
+            return await SetDeviceStatusToOffline(deviceId, restClient, device);
+        }
+
+        /// <inheritdoc />
+        /// <summary>
+        /// Unlocks the device.
+        /// </summary>
+        /// <returns>The device.</returns>
+        /// <param name="deviceId">Device identifier.</param>
+        /// <param name="restClient">Rest client.</param>
+        public async Task<Device> UnlockDeviceXcuiTest(string deviceId, IRestClient restClient)
+        {
+            var device = await SetDeviceAvailabilityToTrue(deviceId, restClient);
+
+            _logger.Debug($"{nameof(UnlockDeviceAppium)}: device id [{deviceId}] stop XcuiTest.");
+
+            return await SetDeviceStatusToOffline(deviceId, restClient, device);
+        }
+
+        /// <inheritdoc />
+        /// <summary>
+        /// Unlocks the device.
+        /// </summary>
+        /// <returns>The device.</returns>
+        /// <param name="deviceId">Device identifier.</param>
+        /// <param name="restClient">Rest client.</param>
+        public async Task<Device> UnlockDeviceManual(string deviceId, IRestClient restClient)
+        {
+            var device = await SetDeviceAvailabilityToTrue(deviceId, restClient);
+
+            _logger.Debug($"{nameof(UnlockDeviceAppium)}: device id [{deviceId}] stop Manual.");
+
+            return await SetDeviceStatusToOffline(deviceId, restClient, device);
+        }
+
+        private async Task<Device> SetDeviceStatusToOffline(string deviceId, IRestClient restClient, Device device)
+        {
+            _logger.Debug(
+                $"{nameof(UnlockDeviceAppium)}: device id [{deviceId}] set status from [{device.Status}] to OFFLINE");
+            device.Status = DeviceStatus.Offline;
+
+            var updatedDevice = await restClient.UpdateDevice(device);
+
+            _logger.Debug($"{nameof(UnlockDeviceAppium)}: updated device [{JsonConvert.SerializeObject(updatedDevice)}]");
+            return updatedDevice;
+        }
+
+        private async Task<Device> SetDeviceAvailabilityToTrue(string deviceId, IRestClient restClient)
+        {
+            _logger.Debug($"{nameof(UnlockDeviceAppium)}: device id [{deviceId}].");
 
             var device = await restClient.GetDevice(deviceId);
 
@@ -102,25 +207,9 @@ namespace MobileManager.Utils
             }
 
             _logger.Debug(
-                $"{nameof(UnlockDevice)}: set device id [{deviceId}] available from [{device.Available}] to true.");
+                $"{nameof(UnlockDeviceAppium)}: set device id [{deviceId}] available from [{device.Available}] to true.");
             device.Available = true;
-
-            _logger.Debug($"{nameof(UnlockDevice)}: device id [{deviceId}] stop running Appium");
-            if (!await appiumService.StopAppiumForDeviceIdAsync(deviceId))
-            {
-                return device;
-            }
-
-            device.AppiumEndpoint = "";
-
-            _logger.Debug(
-                $"{nameof(UnlockDevice)}: device id [{deviceId}] set status from [{device.Status}] to OFFLINE");
-            device.Status = DeviceStatus.Offline;
-
-            var updatedDevice = await restClient.UpdateDevice(device);
-
-            _logger.Debug($"{nameof(UnlockDevice)}: updated device [{JsonConvert.SerializeObject(updatedDevice)}]");
-            return updatedDevice;
+            return device;
         }
 
         /// <inheritdoc />
@@ -290,7 +379,7 @@ namespace MobileManager.Utils
             foreach (var device in checkedDevices)
             {
                 if (checkedDeviceIds.All(id => id != device.Id) && device.Status != DeviceStatus.Locked &&
-                    device.Status != DeviceStatus.LockedOffline)
+                    device.Status != DeviceStatus.LockedOffline && device.Status != DeviceStatus.Offline)
                 {
                     _logger.Debug(
                         $"{nameof(CheckAllDevicesInDevicePoolAreOnline)}: change device status from [{device.Status}] to [{nameof(DeviceStatus.Offline)}].");
@@ -322,6 +411,53 @@ namespace MobileManager.Utils
                     device.Available = true;
                     await restClient.UpdateDevice(device);
                 }
+            }
+        }
+
+
+        /// <inheritdoc />
+        /// <exception cref="T:System.Exception">Failure during unlocking the device.</exception>
+        /// <exception cref="T:System.ArgumentOutOfRangeException">Invalid ReservationType.</exception>
+        public async Task UnlockDeviceByReservationType(IReservation reservation, ReservedDevice reserveDevice, IRestClient restClient, IAppiumService appiumService)
+        {
+            switch (reservation.ReservationType)
+            {
+                case ReservationType.Appium:
+                    _logger.Debug(
+                        $"{nameof(UnlockDeviceByReservationType)}: reservation [{reservation.Id}] [{ReservationType.Appium}].");
+                    if (!(await UnlockDeviceAppium(reserveDevice.DeviceId, restClient, appiumService))
+                        .Available)
+                    {
+                        throw new Exception(
+                            "Applying reservation failed to lock all. ReservationService failed to unlock device " +
+                            reserveDevice.DeviceId);
+                    }
+
+                    break;
+                case ReservationType.XcuiTest:
+                    _logger.Debug(
+                        $"{nameof(UnlockDeviceByReservationType)}: reservation [{reservation.Id}] [{ReservationType.XcuiTest}].");
+                    if (!(await UnlockDeviceXcuiTest(reserveDevice.DeviceId, restClient)).Available)
+                    {
+                        throw new Exception(
+                            "Applying reservation failed to lock all. ReservationService failed to unlock device " +
+                            reserveDevice.DeviceId);
+                    }
+
+                    break;
+                case ReservationType.Manual:
+                    _logger.Debug(
+                        $"{nameof(UnlockDeviceByReservationType)}: reservation [{reservation.Id}] [{ReservationType.Manual}].");
+                    if (!(await UnlockDeviceManual(reserveDevice.DeviceId, restClient)).Available)
+                    {
+                        throw new Exception(
+                            "Applying reservation failed to lock all. ReservationService failed to unlock device " +
+                            reserveDevice.DeviceId);
+                    }
+
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
         }
     }

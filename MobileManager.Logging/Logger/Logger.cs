@@ -2,6 +2,8 @@
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using Microsoft.Extensions.Logging;
+using System.Diagnostics;
+
 
 namespace MobileManager.Logging.Logger
 {
@@ -21,11 +23,14 @@ namespace MobileManager.Logging.Logger
         /// </summary>
         public ManagerLogger()
         {
-            ILoggerFactory loggerFactory = new LoggerFactory()
-                .AddConsole()
-                .AddDebug();
+            ILoggerFactory loggerFactory = new LoggerFactory();
 
-            loggerFactory.AddFile("Logs/log-{Date}.txt", LogLevel.Trace);
+            if (Debugger.IsAttached || Environment.GetEnvironmentVariable("MM_DEBUG_LOG") == "true")
+            {
+                loggerFactory.AddFile("Logs/log-trace-{Date}.txt", LogLevel.Trace);
+            }
+
+            loggerFactory.AddFile("Logs/log-{Date}.txt");
             _logger = loggerFactory.CreateLogger("MobileManager");
         }
 

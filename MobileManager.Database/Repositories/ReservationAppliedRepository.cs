@@ -76,7 +76,7 @@ namespace MobileManager.Database.Repositories
         public IEnumerable<ReservationApplied> GetAll()
         {
             var reservationAppliedList = _context.ReservationsApplied.Include(r => r.ReservedDevices)
-                .OrderBy(r => r.Id).ToList();
+                .OrderBy(r => r.DateApplied).ToList();
 
             return reservationAppliedList;
         }

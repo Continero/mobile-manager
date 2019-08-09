@@ -125,7 +125,7 @@ namespace MobileManager.Database.Repositories
         {
             using (var scope = new TransactionScope())
             {
-                _context.Devices.Include(d => d.Properties).FirstOrDefault(d => d.Id == device.Id);
+                _context.Devices.Include(d => d.Properties).First(d => d.Id == device.Id);
                 _context.Update(device);
                 _context.SaveChanges();
 

@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
+using System.Threading;
 using MobileManager.Logging.Logger;
 using ToolBox.Bridge;
 using ToolBox.Notification;
@@ -42,13 +44,7 @@ namespace MobileManager.Services
             Shell = new ShellConfigurator(BridgeSystem, NotificationSystem);
         }
 
-        /// <summary>
-        /// Runs the process and read output.
-        /// </summary>
-        /// <returns>The process and read output.</returns>
-        /// <param name="processName">Process name.</param>
-        /// <param name="processArgs">Process arguments.</param>
-        /// <param name="timeout">Timeout.</param>
+        /// <inheritdoc />
         public string RunProcessAndReadOutput(string processName, string processArgs, int timeout = 5000)
         {
             _logger.Debug(string.Format("RunProcessAndReadOutput processName: [{0}] args: [{1}]", processName,
@@ -70,13 +66,126 @@ namespace MobileManager.Services
             proc.Start();
 
             proc.WaitForExit(timeout);
+            _logger.Debug($"{nameof(RunProcessAndReadOutput)} [{processName}] FINISHED.");
 
             var output = proc.StandardOutput.ReadToEnd();
-            _logger.Debug(string.Format("RunProcessAndReadOutput output: [{0}]", string.Join("\n", output)));
+            _logger.Debug($"{nameof(RunProcessAndReadOutput)} [{processName}] output: [{string.Join("\n", output)}]");
 
             var errorOutput = proc.StandardError.ReadToEnd();
-            _logger.Debug(string.Format("RunProcessAndReadOutput errorOutput: [{0}]",
-                string.Join("\n", errorOutput)));
+            _logger.Debug($"{nameof(RunProcessAndReadOutput)} [{processName}] errorOutput: [{string.Join("\n", errorOutput)}]");
+
+
+            return output + errorOutput;
+        }
+
+        /// <inheritdoc />
+        public string RunProcessAndReadOutput(string processName, string processArgs, string workingDirectory,
+            int timeout = 5000)
+        {
+            _logger.Debug(string.Format("RunProcessAndReadOutput processName: [{0}] args: [{1}]", processName,
+                processArgs));
+
+            var psi = new ProcessStartInfo()
+            {
+                FileName = processName,
+                Arguments = processArgs,
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                WorkingDirectory = workingDirectory
+            };
+            var proc = new Process
+            {
+                StartInfo = psi
+            };
+
+            proc.Start();
+
+            proc.WaitForExit(timeout);
+            _logger.Debug($"{nameof(RunProcessAndReadOutput)} [{processName}] FINISHED.");
+
+            var output = proc.StandardOutput.ReadToEnd();
+            _logger.Debug($"{nameof(RunProcessAndReadOutput)} [{processName}] output: [{string.Join("\n", output)}]");
+
+            var errorOutput = proc.StandardError.ReadToEnd();
+            _logger.Debug($"{nameof(RunProcessAndReadOutput)} [{processName}] errorOutput: [{string.Join("\n", errorOutput)}]");
+
+
+            return output + errorOutput;
+        }
+
+
+        /// <inheritdoc />
+        public int RunProcessWithBashAndReadOutput(string processName, string processArgs,
+            string workingDirectory = "", string outputFilePath = "",
+            int timeout = 5000)
+        {
+            _logger.Debug(
+                $"{nameof(RunProcessWithBashAndReadOutput)} processName: [{processName}], args: [{processArgs}], workingDir [{workingDirectory}], pipe [{outputFilePath}]");
+
+            var psi = new ProcessStartInfo()
+            {
+                FileName = "/bin/bash",
+                Arguments =
+                    $"-c \"{processName} {processArgs}{(string.IsNullOrEmpty(outputFilePath) ? string.Empty : $" >> {outputFilePath} 2>&1")}\"",
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                WorkingDirectory = workingDirectory
+            };
+            var proc = new Process
+            {
+                StartInfo = psi
+            };
+
+            proc.Start();
+
+            proc.WaitForExit(timeout);
+            _logger.Debug($"{nameof(RunProcessWithBashAndReadOutput)} [{processName}] FINISHED.");
+
+            Thread.Sleep(500);
+
+            return proc.ExitCode;
+        }
+
+        /// <inheritdoc />
+        public string RunScriptWithBashAndReadOutput(string scriptLine, string workingDirectory = "", string pipe = "",
+            int timeout = 5000)
+        {
+            _logger.Debug(
+                $"{nameof(RunScriptWithBashAndReadOutput)} scriptLine [{scriptLine}], workingDir [{workingDirectory}], pipe [{pipe}]");
+
+            var psi = new ProcessStartInfo()
+            {
+                FileName = "/bin/bash",
+                Arguments =
+                    $"-c \"{scriptLine}{(string.IsNullOrEmpty(pipe) ? string.Empty : " 2>&1 | " + pipe)}\"",
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                WorkingDirectory = workingDirectory
+            };
+            var proc = new Process
+            {
+                StartInfo = psi
+            };
+
+            proc.Start();
+
+            proc.WaitForExit(timeout);
+            _logger.Debug($"{nameof(RunScriptWithBashAndReadOutput)} [{scriptLine}] FINISHED.");
+
+            var output = proc.StandardOutput.ReadToEnd();
+            _logger.Debug($"{nameof(RunScriptWithBashAndReadOutput)} [{scriptLine}] output: [{string.Join("\n", output)}]");
+
+            var errorOutput = proc.StandardError.ReadToEnd();
+            _logger.Debug($"{nameof(RunScriptWithBashAndReadOutput)} [{scriptLine}] errorOutput: [{string.Join("\n", errorOutput)}]");
+
+            Thread.Sleep(500);
+//            if (proc.ExitCode != 0)
+//            {
+//                throw new Exception(errorOutput);
+//            }
 
             return output + errorOutput;
         }

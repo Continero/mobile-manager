@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using MobileManager.Models.Devices;
+using MobileManager.Models.Reservations.enums;
 using MobileManager.Models.Reservations.Interfaces;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace MobileManager.Models.Reservations
 {
@@ -29,7 +31,7 @@ namespace MobileManager.Models.Reservations
         public ReservationApplied(string id)
         {
             Id = id;
-            DateCreated = DateTime.Now;
+            DateApplied = DateTime.Now;
         }
 
         /// <inheritdoc />
@@ -47,19 +49,19 @@ namespace MobileManager.Models.Reservations
         public DateTime DateCreated { get; set; }
 
         /// <summary>
+        /// Gets or sets the date applied.
+        /// </summary>
+        /// <value>The date created.</value>
+        public DateTime DateApplied { get; set; }
+
+        /// <summary>
         /// Gets or sets the reserved devices.
         /// </summary>
         /// <value>The reserved devices.</value>
+
         //[Required]  //<======= Forces Cascade delete
         //[ForeignKey("ReservationAppliedRefId")]
         public List<ReservedDevice> ReservedDevices { get; set; }
-
-        /// <inheritdoc />
-        /// <summary>
-        /// Gets or sets a value indicating whether this <see cref="T:MobileManager.Models.Reservations.ReservationApplied" /> is available.
-        /// </summary>
-        /// <value><c>true</c> if available; otherwise, <c>false</c>.</value>
-        public bool Available { get; set; }
 
         /// <inheritdoc />
         /// <summary>
@@ -68,5 +70,9 @@ namespace MobileManager.Models.Reservations
         /// <value>The failed to apply.</value>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
         public int FailedToApply { get; set; }
+
+        /// <inheritdoc />
+        [JsonConverter(typeof(StringEnumConverter))]
+        public ReservationType ReservationType { get; set; }
     }
 }

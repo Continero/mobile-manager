@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using MobileManager.Models.Devices;
+using MobileManager.Models.Reservations.enums;
 using MobileManager.Models.Reservations.Interfaces;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace MobileManager.Models.Reservations
 {
@@ -39,16 +41,9 @@ namespace MobileManager.Models.Reservations
         /// Gets or sets the requested devices.
         /// </summary>
         /// <value>The requested devices.</value>
+
         //[ForeignKey("ReservationRefId")]
         public List<RequestedDevices> RequestedDevices { get; set; }
-
-        /// <inheritdoc />
-        /// <summary>
-        /// Gets or sets a value indicating whether this <see cref="T:MobileManager.Models.Reservations.Reservation" /> is available. Only used internally in <see cref="T:MobileManager.Services.ReservationService" />.
-        /// </summary>
-        /// <value><c>true</c> if available; otherwise, <c>false</c>.</value>
-        [JsonIgnore]
-        public bool Available { get; set; }
 
         /// <inheritdoc />
         /// <summary>
@@ -57,5 +52,10 @@ namespace MobileManager.Models.Reservations
         /// <value>The failed to apply.</value>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
         public int FailedToApply { get; set; }
+
+
+        /// <inheritdoc />
+        [JsonConverter(typeof(StringEnumConverter))]
+        public ReservationType ReservationType { get; set; } = ReservationType.Appium;
     }
 }

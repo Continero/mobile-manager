@@ -18,6 +18,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MobileManager.Configuration
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MobileManager.Appium", "MobileManager.Appium\MobileManager.Appium.csproj", "{77DFECAD-4F64-45C2-85B8-DD8D1734D527}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MobileManager.GitClient", "MobileManager.GitClient\MobileManager.GitClient.csproj", "{317708D2-4A5C-4698-B6B9-47A9399958E4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -124,6 +126,18 @@ Global
 		{77DFECAD-4F64-45C2-85B8-DD8D1734D527}.Release|x64.Build.0 = Release|Any CPU
 		{77DFECAD-4F64-45C2-85B8-DD8D1734D527}.Release|x86.ActiveCfg = Release|Any CPU
 		{77DFECAD-4F64-45C2-85B8-DD8D1734D527}.Release|x86.Build.0 = Release|Any CPU
+		{317708D2-4A5C-4698-B6B9-47A9399958E4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{317708D2-4A5C-4698-B6B9-47A9399958E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{317708D2-4A5C-4698-B6B9-47A9399958E4}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{317708D2-4A5C-4698-B6B9-47A9399958E4}.Debug|x64.Build.0 = Debug|Any CPU
+		{317708D2-4A5C-4698-B6B9-47A9399958E4}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{317708D2-4A5C-4698-B6B9-47A9399958E4}.Debug|x86.Build.0 = Debug|Any CPU
+		{317708D2-4A5C-4698-B6B9-47A9399958E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{317708D2-4A5C-4698-B6B9-47A9399958E4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{317708D2-4A5C-4698-B6B9-47A9399958E4}.Release|x64.ActiveCfg = Release|Any CPU
+		{317708D2-4A5C-4698-B6B9-47A9399958E4}.Release|x64.Build.0 = Release|Any CPU
+		{317708D2-4A5C-4698-B6B9-47A9399958E4}.Release|x86.ActiveCfg = Release|Any CPU
+		{317708D2-4A5C-4698-B6B9-47A9399958E4}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

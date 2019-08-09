@@ -165,6 +165,7 @@ namespace MobileManager.Services
                     }
 
                     imageToConvert.Save(convertedImagePath);
+
                     // automatic encoder selected based on extension.
                 }
             }

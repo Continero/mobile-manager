@@ -1,4 +1,5 @@
 ﻿using System;
+using MobileManager.Models.Reservations.enums;
 
 namespace MobileManager.Models.Reservations.Interfaces
 {
@@ -20,15 +21,14 @@ namespace MobileManager.Models.Reservations.Interfaces
         DateTime DateCreated { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether this <see cref="T:MobileManager.Models.Reservations.Interfaces.IReservation"/> is available.
-        /// </summary>
-        /// <value><c>true</c> if available; otherwise, <c>false</c>.</value>
-        Boolean Available { get; set; }
-
-        /// <summary>
         /// Gets or sets the failed to apply counter.
         /// </summary>
         /// <value>The failed to apply.</value>
         int FailedToApply { get; set; }
+
+        /// <summary>
+        /// Gets or sets the ReservationType flag.
+        /// </summary>
+        ReservationType  ReservationType { get; set; }
     }
 }

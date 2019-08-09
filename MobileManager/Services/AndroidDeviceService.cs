@@ -13,6 +13,7 @@ using MobileManager.Http.Clients;
 using MobileManager.Logging.Logger;
 using MobileManager.Models.Devices;
 using MobileManager.Models.Devices.Enums;
+using MobileManager.Models.Devices.Interfaces;
 using MobileManager.Utils;
 using Newtonsoft.Json;
 
@@ -34,7 +35,8 @@ namespace MobileManager.Services
         /// <summary>
         /// Initializes a new instance of the <see cref="T:MobileManager.Services.AndroidDeviceService"/> class.
         /// </summary>
-        public AndroidDeviceService(IManagerConfiguration configuration, IManagerLogger logger, IExternalProcesses externalProcesses)
+        public AndroidDeviceService(IManagerConfiguration configuration, IManagerLogger logger,
+            IExternalProcesses externalProcesses)
         {
             _logger = logger;
             _externalProcesses = externalProcesses;
@@ -118,15 +120,7 @@ namespace MobileManager.Services
                             var device = new DeviceFactory().NewDevice(deviceId, deviceName.Trim('\n', '\r'), true,
                                 DeviceType.Android, DeviceStatus.Online);
 
-                            var deviceProperties = GetDevicePropertiesById(deviceId);
-
-                            var properties = new List<DeviceProperties>();
-                            foreach (var prop in deviceProperties)
-                            {
-                                properties.Add(new DeviceProperties(prop.Key, prop.Value));
-                            }
-
-                            device.Properties = properties;
+                            GetAndSetDeviceProperties(device);
 
                             await TryAddNewDeviceToDevicePoolAsync(device);
 
@@ -164,6 +158,20 @@ namespace MobileManager.Services
                 _logger.Debug(
                     $"{nameof(LoadConnectedAndroidDevicesAsync)}: Stop ADB server to release ports - output:{result}");
             }
+        }
+
+        private void GetAndSetDeviceProperties(IDevice device)
+        {
+            string deviceId;
+            var deviceProperties = GetDevicePropertiesById(device.Id);
+
+            var properties = new List<DeviceProperties>();
+            foreach (var prop in deviceProperties)
+            {
+                properties.Add(new DeviceProperties(prop.Key, prop.Value));
+            }
+
+            device.Properties = properties;
         }
 
         private string GetDeviceName(string deviceId)
@@ -276,6 +284,8 @@ namespace MobileManager.Services
 
                 if (deviceInDevicePool.Status == DeviceStatus.Offline)
                 {
+                    //update device properties
+                    //GetAndSetDeviceProperties(deviceInDevicePool);
                     deviceInDevicePool.Status = DeviceStatus.Online;
                     deviceInDevicePool.Available = true;
                     await _restClient.UpdateDevice(deviceInDevicePool);

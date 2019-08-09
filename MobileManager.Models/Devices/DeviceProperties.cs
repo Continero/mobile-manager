@@ -30,6 +30,7 @@ namespace MobileManager.Models.Devices
         /// <value>The identifier.</value>
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+
         //[JsonIgnore]
         public String Id { get; set; }
 
